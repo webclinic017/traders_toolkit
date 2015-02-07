@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dash Board</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+        <!-- Reset all CSS rule -->
+        <link rel="stylesheet" href="css/reset.css" />
+        
+        <!-- Main stylesheed  (EDIT THIS ONE) -->
+        <link rel="stylesheet" href="css/style.css" />
+        
+        <!-- jQuery AND jQueryUI -->
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="css/jqueryui/jqueryui.css" />
+        
+        <!-- jWysiwyg - https://github.com/akzhan/jwysiwyg/ -->
+        <link rel="stylesheet" href="scripts/jwysiwyg/jquery.wysiwyg.old-school.css" />
+        <script type="text/javascript" src="scripts/jwysiwyg/jquery.wysiwyg.js"></script>
+        
+        
+        <!-- Tooltipsy - http://tooltipsy.com/ -->
+        <script type="text/javascript" src="scripts/tooltipsy.min.js"></script>
+        
+        <!-- iPhone checkboxes - http://awardwinningfjords.com/2009/06/16/iphone-style-checkboxes.html -->
+        <script type="text/javascript" src="scripts/iphone-style-checkboxes.js"></script>
+        <script type="text/javascript" src="scripts/excanvas.js"></script>
+        
+        <!-- Load zoombox (lightbox effect) - http://www.grafikart.fr/zoombox -->
+        <script type="text/javascript" src="scripts/zoombox/zoombox.js"></script>
+        <link rel="stylesheet" href="scripts/zoombox/zoombox.css" />
+        
+        <!-- Charts - http://www.filamentgroup.com/lab/update_to_jquery_visualize_accessible_charts_with_html5_from_designing_with/ -->
+        <script type="text/javascript" src="scripts/visualize.jQuery.js"></script>
+        
+        <!-- Uniform - http://uniformjs.com/ -->
+        <script type="text/javascript" src="scripts/jquery.uniform.min.js"></script>
+        
+        
+        <!-- Main Javascript that does the magic part (EDIT THIS ONE) -->
+        <script type="text/javascript" src="scripts/main.js"></script>
+
+    </head>
+    <body>
+        
+<!--<script type="text/javascript" src="content/settings/main.js"></script>
+<link rel="stylesheet" href="content/settings/style.css" />-->
+
+
+<div class="bloc">
+    <div class="title">
+        Table Content
+    </div>
+    <div class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" class="checkall"/></th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Catégories</th>
+                    <th>Tags</th>
+                    <th><img src="css/img/th-comment.png" alt="" /></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                                <tr>
+                    <td><input type="checkbox" /></td>
+                    <td><a href="#">Lorem ipsum</a></td>
+                    <td><a href="#">Grafikart</a></td>
+                    <td><a href="#">Dolor</a> , <a href="#">Amet</a></td>
+                    <td><a href="#">Consecte</a> , <a href="#">Adipiscin</a>, <a href="#">Elit</a></td>
+                    <td>35</td>
+                    <td class="actions"><a href="#" title="Edit this content"><img src="css/img/icons/actions/edit.png" alt="" /></a><a href="#" title="Delete this content"><img src="css/img/icons/actions/delete.png" alt="" /></a></td>
+                </tr>
+                            </tbody>
+        </table>
+        <!--<div class="left input">
+            <select name="action" id="tableaction">
+                <option value="">Action</option>
+                <option value="delete">Delete</option>
+            </select>
+        </div>
+        <div class="pagination">
+            <a href="#" class="prev">«</a>
+            <a href="#">1</a>
+            <a href="#" class="current">2</a>
+            ...
+            <a href="#">21</a>
+            <a href="#">22</a>
+            <a href="#" class="next">»</a>
+        </div>-->
+    </div>
+</div>
+        
+        
+  </body>
+</html>
