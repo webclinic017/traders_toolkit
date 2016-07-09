@@ -5,11 +5,11 @@
 * @class BBD
 * 
 * @brief Calculates "Bulls-to_Bears Delta". This indicator takes an x-periods moving average and adds up differences between the closing price and the MA over a time window n. For example, a BBD(3, 19) would build a 3 DMA, then add up positive and negative price differences over 19 days as follows:
-  (5closing P - MA value) for day 1 + (closing P - MA value) for day 2 + ... + (closing P - MA value) for day 19.
-	Shorthand designation for each tuning of the bbd indicator is x-n, where x is x-periods SMA, and n is the time window.
+*  (5closing P - MA value) for day 1 + (closing P - MA value) for day 2 + ... + (closing P - MA value) for day 19.
+*	 Shorthand designation for each tuning of the bbd indicator is x-n, where x is x-periods SMA, and n is the time window.
 * The indicator is recommended for symbols with averegae 50-day volume of 800,000 or more.
 * Conditions subject to statistical analysis. Bullish condition: changes from negative value of the bbd to positive. Bearish condition: changes from positive bbd value to a negative one vs. subsequent P_extremes (min and max) over a given holding period h. The study discretizes readings of each bullish and bearish condition by 'multiple'. It also descretizes resulting readings of P_extreme max and P_extreme min by multiple2. It then builds frequency tables of BBD condition value vs. P_extreme then converts the frequency tables into 'percent odds' and saves summary of from- to- readings of P_extreme max and min according to a specified confidence interval. Scalar stats are also built from the frequency tables such as std. dev. and average. 
-This study was initially devised using the Bulls-to-Bears Ratio, which would take differences in closing prices above an MA divided by differences in closing prices below an MA. However this approach inevitably produced "division by zero" situations, when closing prices were all above an MA. After plotting the distribution of values for the "BBD" (difference) scenario vs. "BBR" (ratio), the difference followed normal distribution, whereas the ratio showed more of a log curve.
+* This study was initially devised using the Bulls-to-Bears Ratio, which would take differences in closing prices above an MA divided by differences in closing prices below an MA. However this approach inevitably produced "division by zero" situations, when closing prices were all above an MA. After plotting the distribution of values for the "BBD" (difference) scenario vs. "BBR" (ratio), the difference followed normal distribution, whereas the ratio showed more of a log curve.
 * BBD tuning. If 'full_study' flag is set in the study_data array, then all of the x-SMA, n-window values are overriden by the default range of values stored in this class's constructor for($i... and for($j... loops. The tuning mode builds all component indicators for the entire csv series, looks at p_ext_max and p_ext_min values to see if "price goes your way", and based on this, caclculates the odds for each level of the bbd-condition. For example for each bullish condition defined as change of the bbd reading from negative or zero to positive value (let's say bbd reading changes from 0 to +0.2), p_ext_max would be favorable if there is positive spike that follows during the holding period. Sometimes for bullish indicator conditions the appropriate P follow up does not occur. These situations get documented and summarized by numerical reading of each bullish/bearish condition vs. odds. All odds for all bullish conditions are then averaged out and presented in the $bbd_tuning table. Same thing is done for all bearish conditions. The odds are then sorted and are printed on chart if the 'full-study' flag is set. All s-tables (stat tables) get saved as well.
 *
 * @result Scalar stats table (s-table), price chart with plotted sma, bbd, marked conditions and observed P_max(from, to) and P_min(from, to) intervals plotted on the chart.
@@ -17,19 +17,19 @@ This study was initially devised using the Bulls-to-Bears Ratio, which would tak
 * @param (string) $symbol_name Symbol name to be displayed in the quote box.
 * @param (string) $study_name Name of the study.
 * @param (array) $study_data[keys explained below]
-		(string) 'study_path' Directory where to save study results and files. Must end with forward slash. Example: "assets/"
-		(array) 'bullish' => array( 3 => array( 8, 19, 29, ), ) Outer array keys are days for the SMA. Inner array values are time-windows.
-		(array) 'bearish' => array( 3 => array( 8, 19, 29, ), ) Outer array keys are days for the SMA. Inner array values are time-windows.
-		(int) 'chart_bars' (int) desired number of bars to be displayed on chart. The study is donw for the study_bars, but only the chart_bars get displayed.
-		(float) 'multiple' descrete interval to round up the independent readings to (BBd readings).
-		(float) 'multiple2' descrete interval to round up the dependent readings to (P ext_min and P ext_max readings).
-		(int) 'holding_period' number of bars to lookup extreme price readings in.
-		(int) 'conf_level' confidence interval to present P ext_max and P ext_min "from" "to".
-
+*		(string) 'study_path' Directory where to save study results and files. Must end with forward slash. Example: "assets/"
+*		(array) 'bullish' => array( 3 => array( 8, 19, 29, ), ) Outer array keys are days for the SMA. Inner array values are time-windows.
+*		(array) 'bearish' => array( 3 => array( 8, 19, 29, ), ) Outer array keys are days for the SMA. Inner array values are time-windows.
+*		(int) 'chart_bars' (int) desired number of bars to be displayed on chart. The study is done for the study_bars, but only the chart_bars get displayed.
+*		(float) 'multiple' descrete interval to round up the independent readings to (BBd readings).
+*		(float) 'multiple2' descrete interval to round up the dependent readings to (P ext_min and P ext_max readings).
+*		(int) 'holding_period' number of bars to lookup extreme price readings in.
+*		(int) 'conf_level' confidence interval to present P ext_max and P ext_min "from" "to".
+*
 * @result ...
-		s-table(s) for max and min peaks saved on disk (s-table stands for table containing scalar statistics and confidence intervals). If the 'full_study' flag is used all of the calculated s-tables get saved.
-		.png image of the chart.
-		$this->output gets filled with html code that presents results of the study. 
+*		s-table(s) for max and min peaks saved on disk (s-table stands for table containing scalar statistics and confidence intervals). If the 'full_study' flag is used all of the calculated s-tables get saved.
+*		.png image of the chart.
+*		$this->output gets filled with html code that presents results of the study. 
 * 
 * @version 130305
 * @author Alex Kay (MGWebGroup)
