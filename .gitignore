@@ -1,0 +1,9 @@
+cache/
+data/source/ohlcv1/
+dev_alex/
+error_log
+temp.php
+test.php
+library/yahoo-finance-api/.git/
+library/yahoo-finance-api/.gitignore
+library/yahoo-finance-api/README.md
