@@ -1,16 +1,23 @@
 <?php
-set_include_path( get_include_path() . PATH_SEPARATOR . __DIR__ . '/library' );
+require 'library/Psr4AutoloaderClass.php';
+$loader = new Psr4AutoloaderClass;
+$loader->register();
+$loader->addNamespace('Scheb\YahooFinanceApi', 'library/scheb/yahoo-finance-api');
+//$loader->addNamespace('Scheb\YahooFinanceApi\Exception', '/library/scheb/yahoo-finance-api/Exception');
 
-spl_autoload_register();
+
+//set_include_path( get_include_path() . PATH_SEPARATOR . __DIR__ . '/library' );
+
+//spl_autoload_register();
 
 $client = new \Scheb\YahooFinanceApi\ApiClient();
 
 //Fetch basic data
-$data[1] = $client->getQuotesList("YHOO"); //Single stock
+$data[1] = $client->getQuotesList('YHOO'); //Single stock
 $data[2] = $client->getQuotesList( array( 'YHOO', 'GOOG' ) ); //Multiple stocks at once
 
 //Fetch full data set
-$data[3] = $client->getQuotes("YHOO"); //Single stock
+$data[3] = $client->getQuotes('YHOO'); //Single stock
 $data[4] = $client->getQuotes(array("YHOO", "GOOG")); //Multiple stocks at once
 
 //Get historical data
@@ -38,5 +45,4 @@ ob_start();
 echo json_encode($data[5]);
 
 ob_end_flush();
-
 
