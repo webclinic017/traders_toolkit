@@ -79,13 +79,10 @@ class CSV {
 	* @param (string) $args['symbol'] Symbol name to be looked up in the yahoo and google public quote system.  
 	* @param (string) $args['start_date'] Starting date for the .csv file. Also ends up to be part of the .csv file name. The class wiil present the request with the start date specified in here to the quotes server. Actual start date may be different depending on what the quotes server responds with.
 	* @param (string) $args['path'] Path to directory where to save the downloaded .csv file. Can be with or without the trailing forward slash.
-	* @param (num) $args['refresh'] Time in minutes since last update of the .csv file before updating of the quote will be performed. I.e. if this time has not elapsed since last
-			.csv file update, the quote will not be loaded. This setting does not affect downloading of the entire .csv file it it's missing. If $args['refresh_quote'] is 0 or
-			omitted the quote will be updated every time this class is instantiated.
+	* @param (num) $args['refresh'] Time in minutes since last update of the .csv file before updating of the quote will be performed. I.e. if this time has not elapsed since last .csv file update, the quote will not be loaded. This setting does not affect downloading of the entire .csv file it it's missing. If $args['refresh_quote'] is 0 or omitted the quote will be updated every time this class is instantiated.
 	*
 	* @result (file) downloaded .csv file with quotes. File naming convention is: <SYMB>_<d|w>_<YYYYMMDD>.csv,  where <YYYYMMDD> is quote start date specified by @arg['start_date'].
-	*   all dates within the .csv file must be in the YYYY-MM-DD format.
-			The class also stores the OHLCV data inside itself.
+	*   all dates within the .csv file must be in the YYYY-MM-DD format. The class also stores the OHLCV data inside itself.
 	* 
 	*/
 	public function __construct ( $args = array( 'symbol' => 'SPY', 'start_date' => '1-Jan-2002', 'path' => '../assets/ohlcv/' ) ) { 
@@ -297,6 +294,7 @@ class CSV {
 		$this->last['low'] = end( $this->low );
 		$this->last['close'] = end( $this->close );
 		$this->last['volume'] = end( $this->volume );
+		$this->last['key'] = key( $this->date_value );
 		
 	}
 	

@@ -1,0 +1,4 @@
+[23-Jul-2016 20:55:56 America/Denver] PHP Parse error:  syntax error, unexpected '$expect' (T_VARIABLE) in /home2/mybluecr/public_html/121021_traders_toolkit/library/Psr4AutoloaderClassTest.php on line 57
+[23-Jul-2016 20:58:30 America/Denver] PHP Parse error:  syntax error, unexpected '$expect' (T_VARIABLE) in /home2/mybluecr/public_html/121021_traders_toolkit/library/Psr4AutoloaderClassTest.php on line 57
+[23-Jul-2016 21:01:43 America/Denver] PHP Parse error:  syntax error, unexpected '$expect' (T_VARIABLE) in /home2/mybluecr/public_html/121021_traders_toolkit/library/Psr4AutoloaderClassTest.php on line 51
+[23-Jul-2016 21:02:00 America/Denver] PHP Parse error:  syntax error, unexpected '$expect' (T_VARIABLE) in /home2/mybluecr/public_html/121021_traders_toolkit/library/Psr4AutoloaderClassTest.php on line 51
