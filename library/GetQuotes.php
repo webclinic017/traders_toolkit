@@ -100,6 +100,7 @@ class GetQuotes
         $currentQuote = null;
 
         if (!file_exists($this->pathToOHLCVFile)) {
+            // var_dump('in !file_exists'); exit();
             $this->firstDateInOHLCV = $this->createDate('start');
             
             $OHLCVArray = $this->downloadOHLCV($this->firstDateInOHLCV, $this->prevT, $provider);
@@ -245,27 +246,16 @@ class GetQuotes
             case 'yahoo':
                 $quotes = ApiClientFactory::createApiClient();
                 $quote = $quotes->getQuote($this->symbol);
-                // var_dump($quote); exit();
-                $out['Symbol'] = $this->symbol;
-                // $date = new DateTime($quote['query']['created'], new DateTimeZone('America/New_York'));
-                // $out['Date'] = $date->format('Y-m-d');
-                $out['Date'] = $this->createDate('now');
-                // $out['Open'] = sprintf('%.2f', $quote['query']['results']['tr'][0]['td'][1]['content']);
-                // $out['Open'] = $quote->get();
-
-                $daysRange = $quote['query']['results']['tr'][4]['td'][1]['content'];
-                $bufferArray = explode(' - ', $daysRange);
-                $out['High'] = sprintf('%.2f', $bufferArray[1]);
-                $out['Low'] = sprintf('%.2f', $bufferArray[0]);
-
-                $bufferArray = explode(' x ', $quote['query']['results']['tr'][2]['td'][1]['content']);
-                $bid = $bufferArray[0];
-                $bufferArray = explode(' x ', $quote['query']['results']['tr'][3]['td'][1]['content']);
-                $ask = $bufferArray[0];
-                $out['Close'] = sprintf('%.2f', ($bid + $ask) / 2);
-
-                $out['Volume'] = sprintf('%u', str_replace(',', '', $quote['query']['results']['tr'][10]['td'][1]['content']));
+                // var_dump($quote);
+                $out['Symbol'] = $quote->getSymbol();
+                $out['Date'] = $quote->getRegularMarketTime()->format('Y-m-d');
+                $out['Open'] = sprintf('%.2f', $quote->getRegularMarketOpen());
+                $out['High'] = sprintf('%.2f', $quote->getRegularMarketDayHigh());
+                $out['Low'] = sprintf('%.2f', $quote->getRegularMarketDayLow());
+                $out['Close'] = sprintf('%.2f', $quote->getRegularMarketPrice());
+                $out['Volume'] = sprintf('%u', $quote->getRegularMarketVolume());
                 $out['Adj_Close'] = '-1';
+
                 break;
         }
 
@@ -320,6 +310,7 @@ class GetQuotes
                     krsort($buffer['query']['results']['quote']);
                     $buffer2 = array_values($buffer['query']['results']['quote']);
                     $buffer['query']['results']['quote'] = $buffer2;
+                    // var_dump($buffer['query']['results']['quote']); exit();
                 }
 
                 // var_dump($buffer['query']['results']['quote']); exit();

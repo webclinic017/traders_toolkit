@@ -94,7 +94,7 @@ class GetQuotesYahooTest3 extends TestCase
 
         // Two lines below will work either with a random symbol, or a mock one
         $symbol = $this->pickASymbol();
-        //$symbol = 'TST';
+        // $symbol = 'CF';
 
         $pathSpec = GetQuotes::PATH_TO_OHLCV_FILES . '/' . GetQuotes::createNameOfOHLCVFile($symbol);
         fwrite(STDOUT, "\nQuotes will be downloaded into file: " . $pathSpec . "\n");
@@ -147,6 +147,7 @@ class GetQuotesYahooTest3 extends TestCase
         
         $symbol = $this->CUT->getSymbol();
         $startDate = $this->CUT->getDate('start');
+        // var_dump($startDate); exit();
         $endDate = $this->CUT->getDate('prevt');
         $quotes = $this->CUT->downloadOHLCV($startDate, $endDate, self::PROVIDER);
 
@@ -161,22 +162,31 @@ class GetQuotesYahooTest3 extends TestCase
         $lastLineIndex = $csv->count() - 1;
         $csv->seek($lastLineIndex);
         $line = $csv->current();
-        $this->assertArraySubset($line, $quotes['query']['results']['quote'][$lastLineIndex - 1]);
+            // $fh = fopen('testoutput.txt', 'w+');
+            // fwrite($fh, var_export($lastLineIndex, true)); 
+            // fwrite($fh, var_export($line, true)); 
+            // fwrite($fh, var_export($quotes['query']['results']['quote'], true)); 
+            // flose($fh); 
+            // exit();
+        $this->assertArraySubset($line, $quotes['query']['results']['quote'][$lastLineIndex]);
+        // $this->assertArraySubset($line, $quotes['query']['results']['quote'][0]);
 
-        $csv->rewind();
-        $line = $csv->current();
-        $this->assertArraySubset($line, $currentQuote);
-        $timeStampOfFirstLineInFile = strtotime($line['Date']);
+            $csv->rewind();
+            $line = $csv->current();
+            if ($currentQuote != null) {
+                $this->assertArraySubset($line, $currentQuote);
+            }
+            $timeStampOfFirstLineInFile = strtotime($line['Date']);
         
         $csv->seek(1);
         $line = $csv->current();
         $timeStampOfSecondLineInFile = strtotime($line['Date']);
         $this->assertGreaterThan($timeStampOfSecondLineInFile, $timeStampOfFirstLineInFile);
 
-        $randomLineNumber = rand(1,$lastLineIndex);
+        $randomLineNumber = rand(0,$lastLineIndex);
         $csv->seek($randomLineNumber);
         $line = $csv->current();
-        $this->assertArraySubset($line, $quotes['query']['results']['quote'][$randomLineNumber - 1]);
+        $this->assertArraySubset($line, $quotes['query']['results']['quote'][$randomLineNumber]);
 
         //print_r($currentQuote);
 

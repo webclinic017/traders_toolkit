@@ -7,7 +7,7 @@
     </testsuite>
 
     <testsuite name="internet functions">
-      <!--file>GetQuotesYahooTest10.php</file-->
+      <file>GetQuotesYahooTest10.php</file>
     </testsuite>
 
     <testsuite name="no quote file">
