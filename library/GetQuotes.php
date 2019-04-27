@@ -15,7 +15,10 @@ use DateTime, DateTimeZone, DateInterval;
 use Exception;
 use Yasumi\Yasumi, Yasumi\Holiday, Yasumi\Filters\BankHolidaysFilter;
 use SgCsv\CsvMappedReader;
-use Scheb\YahooFinanceApi\ApiClient;
+use Scheb\YahooFinanceApi\ApiClient, Scheb\YahooFinanceApi\ApiClientFactory;
+// use GuzzleHttp\Client;
+// use GuzzleHttp\ClientInterface;
+
 
 /**
  * Updates the quotes (OHLCV) file.
@@ -240,12 +243,15 @@ class GetQuotes
         $out = null;
         switch ($provider) {
             case 'yahoo':
-                $quotes = new ApiClient();
-                $quote = $quotes->getLatestQuote($this->symbol);
+                $quotes = ApiClientFactory::createApiClient();
+                $quote = $quotes->getQuote($this->symbol);
+                // var_dump($quote); exit();
                 $out['Symbol'] = $this->symbol;
-                $date = new DateTime($quote['query']['created'], new DateTimeZone('America/New_York'));
-                $out['Date'] = $date->format('Y-m-d');
-                $out['Open'] = sprintf('%.2f', $quote['query']['results']['tr'][0]['td'][1]['content']);
+                // $date = new DateTime($quote['query']['created'], new DateTimeZone('America/New_York'));
+                // $out['Date'] = $date->format('Y-m-d');
+                $out['Date'] = $this->createDate('now');
+                // $out['Open'] = sprintf('%.2f', $quote['query']['results']['tr'][0]['td'][1]['content']);
+                // $out['Open'] = $quote->get();
 
                 $daysRange = $quote['query']['results']['tr'][4]['td'][1]['content'];
                 $bufferArray = explode(' - ', $daysRange);
@@ -278,8 +284,45 @@ class GetQuotes
     {
         switch ($provider) {
             case 'yahoo':
-                $quotes = new ApiClient();
-                $buffer = $quotes->getHistoricalData($this->symbol, $startDate, $endDate);
+                $quotes = ApiClientFactory::createApiClient();
+                // var_dump($quotes); exit();
+                // $startDate = new DateTime('21-Apr-2019');
+                $result = $quotes->getHistoricalData($this->symbol, ApiClient::INTERVAL_1_DAY, $startDate, $endDate);
+                // var_dump($result); exit();
+                if (count($result) == 1) {
+                    $buffer['query']['count'] = 1;
+                    $buffer['query']['created'] = $this->createDate('now')->setTimezone(new DateTimeZone('Etc/UTC'))->format(DateTime::W3C);
+                    $buffer['query']['lang'] = 'en-US';
+                    $buffer['query']['results']['quote']['Symbol'] = $this->symbol;
+                    $buffer['query']['results']['quote']['Date'] = $result[0]->getDate()->format('Y-m-d');
+                    $buffer['query']['results']['quote']['Open'] = (string)$result[0]->getOpen();
+                    $buffer['query']['results']['quote']['High'] = (string)$result[0]->getHigh();
+                    $buffer['query']['results']['quote']['Low'] = (string)$result[0]->getLow();
+                    $buffer['query']['results']['quote']['Close'] = (string)$result[0]->getClose();
+                    $buffer['query']['results']['quote']['Volume'] = (string)$result[0]->getVolume();
+                    $buffer['query']['results']['quote']['Adj_Close'] = (string)$result[0]->getAdjClose();
+                } else {
+                    $buffer['query']['count'] = count($result);
+                    $buffer['query']['created'] = $this->createDate('now')->setTimezone(new DateTimeZone('Etc/UTC'))->format(DateTime::W3C);
+                    $buffer['query']['lang'] = 'en-US';
+                    foreach ($result as $key => $item) {
+                        $buffer['query']['results']['quote'][$key]['Symbol'] = $this->symbol;
+                        $buffer['query']['results']['quote'][$key]['Date'] = $item->getDate()->format('Y-m-d');
+                        $buffer['query']['results']['quote'][$key]['Open'] = (string)$item->getOpen();
+                        $buffer['query']['results']['quote'][$key]['High'] = (string)$item->getHigh();
+                        $buffer['query']['results']['quote'][$key]['Low'] = (string)$item->getLow();
+                        $buffer['query']['results']['quote'][$key]['Close'] = (string)$item->getClose();
+                        $buffer['query']['results']['quote'][$key]['Volume'] = (string)$item->getVolume();
+                        $buffer['query']['results']['quote'][$key]['Adj_Close'] = (string)$item->getAdjClose();
+                    }
+
+                    // sort $buffer here
+                    krsort($buffer['query']['results']['quote']);
+                    $buffer2 = array_values($buffer['query']['results']['quote']);
+                    $buffer['query']['results']['quote'] = $buffer2;
+                }
+
+                // var_dump($buffer['query']['results']['quote']); exit();
                 if (1 == $buffer['query']['count']) { 
                     $out = $buffer;
                     unset($out['query']['results']['quote']);

@@ -1,7 +1,18 @@
 scheb/yahoo-finance-api
 =======================
 
-This is a PHP client for Yahoo Finance API. It provides easy access to stock quotes via Yahoo's [YQL API] (http://developer.yahoo.com/yql/).
+[![Build Status](https://travis-ci.org/scheb/yahoo-finance-api.svg?branch=master)](https://travis-ci.org/scheb/yahoo-finance-api)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/scheb/yahoo-finance-api/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/scheb/yahoo-finance-api/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/scheb/yahoo-finance-api/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/scheb/yahoo-finance-api/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/scheb/yahoo-finance-api/v/stable.svg)](https://packagist.org/packages/scheb/yahoo-finance-api)
+[![Total Downloads](https://poser.pugx.org/scheb/yahoo-finance-api/downloads)](https://packagist.org/packages/scheb/yahoo-finance-api)
+[![License](https://poser.pugx.org/scheb/yahoo-finance-api/license.svg)](https://packagist.org/packages/scheb/yahoo-finance-api)
+
+This is a PHP client for Yahoo Finance API.
+
+Since YQL APIs have been discontinued in November 2017, this client is using non-official API endpoints for quotes, search and historical data.
+
+**WARNING:** These non-official APIs cannot be assumed stable and might break any time. Also, you might violate Yahoo's terms of service. So use them at your own risk.
 
 ## Installation
 
@@ -11,14 +22,12 @@ Download via Composer:
 php composer.phar require scheb/yahoo-finance-api
 ```
 
-When being asked for the version use dev-master or any different version you want.
-
 Alternatively you can also add the bundle directly to composer.json:
 
-```js
+```json
 {
     "require": {
-        "scheb/yahoo-finance-api": "dev-master"
+        "scheb/yahoo-finance-api": "^3.0"
     }
 }
 ```
@@ -32,26 +41,51 @@ php composer.phar update scheb/yahoo-finance-api
 ## Usage
 
 ```php
-$client = new \Scheb\YahooFinanceApi\ApiClient();
+use Scheb\YahooFinanceApi\ApiClient;
+use Scheb\YahooFinanceApi\ApiClientFactory;
+use GuzzleHttp\Client;
 
-//Fetch basic data
-$data = $client->getQuotesList("YHOO"); //Single stock
-$data = $client->getQuotesList(array("YHOO", "GOOG")); //Multiple stocks at once
+// Create a new client from the factory
+$client = ApiClientFactory::createApiClient();
 
-//Fetch full data set
-$data = $client->getQuotes("YHOO"); //Single stock
-$data = $client->getQuotes(array("YHOO", "GOOG")); //Multiple stocks at once
+// Or use your own Guzzle client and pass it in
+$options = [/*...*/];
+$guzzleClient = new Client($options);
+$client = ApiClientFactory::createApiClient($guzzleClient);
 
-//Get historical data
-$data = $client->getHistoricalData("YHOO");
+// Returns an array of Scheb\YahooFinanceApi\Results\SearchResult
+$searchResult = $client->search("Apple");
 
-//Search stocks
-$data = $client->search("Yahoo");
+// Returns an array of Scheb\YahooFinanceApi\Results\HistoricalData
+$historicalData = $client->getHistoricalData("AAPL", ApiClient::INTERVAL_1_DAY, new \DateTime("-14 days"), new \DateTime("today"));
+
+// Returns Scheb\YahooFinanceApi\Results\Quote
+$exchangeRate = $client->getExchangeRate("USD", "EUR");
+
+// Returns an array of Scheb\YahooFinanceApi\Results\Quote
+$exchangeRates = $client->getExchangeRates([
+    ["USD", "EUR"],
+    ["EUR", "USD"],
+]);
+
+// Returns Scheb\YahooFinanceApi\Results\Quote
+$quote = $client->getQuote("AAPL");
+
+// Returns an array of Scheb\YahooFinanceApi\Results\Quote
+$quotes = $client->getQuotes(["AAPL", "GOOG"]);
 ```
 
-Each function returns the decoded JSON response as an associative array. See the following examples:
+Contribute
+----------
+You're welcome to [contribute](https://github.com/scheb/yahoo-finance-api/graphs/contributors) to this library by
+creating a pull requests or feature request in the issues section. For pull requests, please follow these guidelines:
 
-  - [getQuotesList](http://query.yahooapis.com/v1/public/yql?env=http%3A%2F%2Fdatatables.org%2Falltables.env&format=json&q=select+*+from+yahoo.finance.quoteslist+where+symbol+in+%28%27YHOO%27,%27GOOG%27%29) for Yahoo and Google
-  - [getQuotes](http://query.yahooapis.com/v1/public/yql?env=http%3A%2F%2Fdatatables.org%2Falltables.env&format=json&q=select+*+from+yahoo.finance.quotes+where+symbol+in+%28%27YHOO%27,%27GOOG%27%29) for Yahoo and Google
-  - [getHistoricalData](http://query.yahooapis.com/v1/public/yql?env=http%3A%2F%2Fdatatables.org%2Falltables.env&format=json&q=select%20*%20from%20yahoo.finance.historicaldata%20where%20startDate=%272014-01-01%27%20and%20endDate=%272014-01-10%27%20and%20symbol=%27YHOO%27) for Yahoo
-  - [search](http://autoc.finance.yahoo.com/autoc?query=Yahoo&callback=YAHOO.Finance.SymbolSuggest.ssCallback) for Yahoo
+- Symfony code style
+- Please add/update test cases
+- Test methods should be named `[method]_[scenario]_[expected result]`
+
+To run the test suite install the dependencies with `composer install` and then execute `bin/phpunit`.
+
+License
+-------
+This bundle is available under the [MIT license](LICENSE).

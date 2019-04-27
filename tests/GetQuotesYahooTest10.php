@@ -107,16 +107,16 @@ class GetQuotesYahooTest10 extends TestCase
         fwrite(STDOUT, " startDate=" . $startDate->format('Y-m-d') . " endDate=" . $endDate->format('Y-m-d') . "\n");
         $OHLCV = $this->CUT->downloadOHLCV($startDate, $endDate, self::PROVIDER);
 
-        print_r($OHLCV);
+        // print_r($OHLCV); exit();
         $this->assertSame($symbol, $OHLCV['query']['results']['quote'][0]['Symbol'], "Picked symbol in the setUp does not match downloaded symbol\n");
-        $this->assertSame(1, $OHLCV['query']['count']);
+        // $this->assertSame(1, $OHLCV['query']['count']);
 
         foreach ($this->fields as $key) {
             $this->assertArrayHasKey($key,$OHLCV['query']['results']['quote'][0]);
             $this->assertNotNull($OHLCV['query']['results']['quote'][0][$key]);
             $this->assertInternalType('string', $OHLCV['query']['results']['quote'][0][$key]);
         }
-        $this->assertSame($startDate->format('Y-m-d'),$OHLCV['query']['results']['quote'][0]['Date']);
+        $this->assertSame($startDate->format('Y-m-d'),$OHLCV['query']['results']['quote'][1]['Date']);
 
     }
 
