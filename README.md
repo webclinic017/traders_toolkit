@@ -1,4 +1,18 @@
 # traders_toolkit
+-----------------
+## Version 2
+
+Supports several market data providers and has historical price data organized into data entities.
+
+### Installation
+
+1. Install Vendor dependancies:
+```bash
+$> composer install
+```
+
+
+### Miscellaneous:
 
 Various stock market price analysis tools. Includes set of calculator and statistical functions grouped into classes.
 
