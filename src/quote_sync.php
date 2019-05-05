@@ -1,7 +1,18 @@
 <?php
 require __DIR__.'/autoloader.php';
 
+use MGWebGroup\PriceData\TickerTape_Null;
+use MGWebGroup\PriceData\OHLCVFromYahoo;
+use MGWebGroup\PriceData\PriceHistory;
 
+$tickerTapeCQG = new TickerTape_Null();
+$tickerTapeLocation = 'locaion2';
+
+$OHLCVFromYahoo = new OHLCVFromYahoo();
+$OHLCVLocation = '../data/';
+
+
+$ph = new PriceHistory($OHLCVFromYahoo, $OHLCVLocation, $tickerTapeCQG, $tickerTapeLocation);
 
 // namespace MGWebGroup;
 

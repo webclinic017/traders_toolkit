@@ -11,7 +11,7 @@
 
 namespace MGWebGroup\PriceData;
 
-interface OHLCVProvider
+interface OHLCVProviderInterface
 {
 	/**
 	* Units for the Open, High, Low, Close, Volume (OHLCV) data. 
@@ -34,11 +34,12 @@ interface OHLCVProvider
 
 	/**
 	* Downloads OHLCV data from a provider.
+	* @param string $symbol
 	* @param DateTime $fromDate
 	* @param DateTime $toDate
-	* @param string $unit
+	* @param string $unit one of the UNIT_* constants of this interface
 	* @return array ( 0 => array('Date' => string, 'Open' => float, 'High' => float, 'Low' => float, 'Close' => float, 'Volume' => null | float), 1 => ... )
 	*/
-	public function downloadHistory($fromDate, $toDate, $unit);
+	public function downloadHistory($symbol, $fromDate, $toDate, $unit);
 
 }

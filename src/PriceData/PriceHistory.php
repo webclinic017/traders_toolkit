@@ -11,7 +11,7 @@
 
 namespace MGWebGroup\PriceData;
 
-use MGWebGroup\PriceData\OHLCVProvider;
+use MGWebGroup\PriceData\OHLCVProviderInterface;
 
 /**
 * Handles only historical price information without any instant or current quotes.
@@ -70,7 +70,7 @@ class PriceHistory
 	* @param string $tickerTapeLocation path/with/filename
 
 	*/	
-	public function __construct(OHLCVProvider $OHLCVProvider, $OHLCVLocation, TickerTapeProvider $tickerTapeProvider, $tickerTapeLocation)
+	public function __construct(OHLCVProviderInterface $OHLCVProvider, $OHLCVLocation, TickerTapeProviderInterface $tickerTapeProvider, $tickerTapeLocation)
 	{
 		$this->OHLCVProvider = $OHLCVProvider;
 		$this->tickerTapeProvider = $tickerTapeProvider;
