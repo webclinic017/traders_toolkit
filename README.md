@@ -2,7 +2,21 @@
 -----------------
 ## Version 2
 
-Supports several market data providers and has historical price data organized into data entities.
+Supports several market data providers and has historical price data organized into data entities. Data entities are saved on disk as csv or mysqli, or Redis files.
+
+#### Theory:
+Two main concepts: Price History and Latest Quote.
+Price History is initially saved as a stream of actual ticks (tape) from the market data provider. It subsequently can be transformed into daily, weekly, monthly, etc. formats.
+At this time, I don't have a provider of ticks and can only obtain daily quotes.
+
+
+
+Price History Manager
+
+API Manager
+
+Price History Transformer 
+Transforms given Price History into 
 
 ### Installation
 
