@@ -1,5 +1,6 @@
 {
     "require": {
-        "azuyalabs/yasumi": "^2.1"
+        "azuyalabs/yasumi": "^2.1",
+        "scheb/yahoo-finance-api": "^3.1"
     }
 }
