@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace MGWebGroup;
+namespace MGWebGroup\PriceData;
 
 interface OHLCVProvider
 {
 	/**
 	* Units for the Open, High, Low, Close, Volume (OHLCV) data. 
-	* These follow the interval_spec for the \DateInterval class
+	* These follow interval_spec for the \DateInterval class
 	*/
 	const UNIT_1MIN = 'PT1M';
 	const UNIT_2MIN = 'PT2M';

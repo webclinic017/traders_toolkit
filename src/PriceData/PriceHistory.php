@@ -9,9 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace MGWebGroup;
+namespace MGWebGroup\PriceData;
 
-use MGWebGroup\OHLCVProvider;
+use MGWebGroup\PriceData\OHLCVProvider;
 
 /**
 * Handles only historical price information without any instant or current quotes.

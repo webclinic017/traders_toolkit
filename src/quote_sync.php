@@ -1,14 +1,11 @@
 <?php
+require __DIR__.'/autoloader.php';
 
-namespace MGWebGroup;
 
-define('ROOT_PATH', realpath(__DIR__.'/..'));
 
-require ROOT_PATH.'/vendor/autoload.php';
-
+// namespace MGWebGroup;
 
 /**
-
 use Yasumi\Yasumi;
 use Yasumi\Filters\OfficialHolidaysFilter;
 
@@ -40,23 +37,23 @@ foreach ($officialHolidays as $holiday) {
 // // var_dump($reader->getSeekMap()); exit();
 
 
-require ROOT_PATH.'/src/PriceHistoryProvider.php';
-require ROOT_PATH.'/src/PriceHistory.php';
+// require ROOT_PATH.'/src/PriceHistoryProvider.php';
+// require ROOT_PATH.'/src/PriceHistory.php';
 
-use MGWebGroup\PriceHistoryProvider;
-use MGWebGroup\PriceHistory;
+// use MGWebGroup\PriceHistoryProvider;
+// use MGWebGroup\PriceHistory;
 
-class OHLCVProvider 
-{}
+// class OHLCVProvider 
+// {}
 
-class TickerTapeProvider
-{}
+// class TickerTapeProvider
+// {}
 
-$provider = new OHLCVProvider;
-$fromDate = new \DateTime();
-$toDate = null;
+// $provider = new OHLCVProvider;
+// $fromDate = new \DateTime();
+// $toDate = null;
 
-$priceHistory = new PriceHistory();
+// $priceHistory = new PriceHistory();
 
-echo $priceHistory->downloadOHLCV($fromDate, $toDate, $provider);
-$priceHistory->downloadTickerTape($fromDate, $toDate, new TickerTapeProvider);
+// echo $priceHistory->downloadOHLCV($fromDate, $toDate, $provider);
+// $priceHistory->downloadTickerTape($fromDate, $toDate, new TickerTapeProvider);
