@@ -38,7 +38,7 @@ interface OHLCVProviderInterface
 	* @param DateTime $fromDate
 	* @param DateTime $toDate
 	* @param string $unit one of the UNIT_* constants of this interface
-	* @return array ( 0 => array('Date' => string, 'Open' => float, 'High' => float, 'Low' => float, 'Close' => float, 'Volume' => null | float), 1 => ... )
+	* @return array ( 0 => array('Date' => timestamp, 'Open' => float, 'High' => float, 'Low' => float, 'Close' => float, 'Volume' => null | float), 1 => ... )
 	*/
 	public function downloadHistory($symbol, $fromDate, $toDate, $unit);
 

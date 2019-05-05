@@ -4,15 +4,51 @@ require __DIR__.'/autoloader.php';
 use MGWebGroup\PriceData\TickerTape_Null;
 use MGWebGroup\PriceData\OHLCVFromYahoo;
 use MGWebGroup\PriceData\PriceHistory;
+use MGWebGroup\PriceData\PriceDataException;
 
-$tickerTapeCQG = new TickerTape_Null();
-$tickerTapeLocation = 'locaion2';
+$symbol = 'AAPL';
+
+$tickerTape = new TickerTape_Null(); // this is a plug class for non-existent TickerTape func
+$tickerTapeLocation = __DIR__.'/../data/source/ptv/null';
 
 $OHLCVFromYahoo = new OHLCVFromYahoo();
-$OHLCVLocation = '../data/';
+$OHLCVLocation = __DIR__.'/../data/source/ohlcv/'.$symbol.'_d.csv';
+
+try { // see if file locations can be opened
+	$ph = new PriceHistory($OHLCVFromYahoo, $OHLCVLocation, $tickerTape, $tickerTapeLocation, $symbol);
+	$fromDate = new \DateTime('10 days ago');
+	// $toDate = null;
+	$history = $ph->downloadOHLCV($unit = 'P1D', $fromDate, $toDate = null);
+	// var_dump($history);
+	// echo PHP_EOL;
+	// echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume').PHP_EOL;
+	// foreach ($history as $record) {
+	// 	echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', date('Y-m-d H:i:s', $record['Date']), $record['Open'], $record['High'], $record['Low'], $record['Close'], $record['Volume']).PHP_EOL;
+	// }
+	// echo PHP_EOL;
+	// echo 'Sorted:'.PHP_EOL;
+	// $history = $ph->sortHistory($history, SORT_DESC);
+	$ph->sortHistory($history, SORT_DESC);
+	// echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume').PHP_EOL;
+	// foreach ($history as $record) {
+	// 	echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', date('Y-m-d H:i:s', $record['Date']), $record['Open'], $record['High'], $record['Low'], $record['Close'], $record['Volume']).PHP_EOL;
+	// }
+	// echo PHP_EOL;
+	
 
 
-$ph = new PriceHistory($OHLCVFromYahoo, $OHLCVLocation, $tickerTapeCQG, $tickerTapeLocation);
+} catch (PriceDataException $e) {
+	var_dump($e->getMessage());
+	// log message
+	exit(1);
+}
+
+// $ph->setSymbol($symbol);
+
+
+
+
+
 
 // namespace MGWebGroup;
 
@@ -47,24 +83,3 @@ foreach ($officialHolidays as $holiday) {
 
 // // var_dump($reader->getSeekMap()); exit();
 
-
-// require ROOT_PATH.'/src/PriceHistoryProvider.php';
-// require ROOT_PATH.'/src/PriceHistory.php';
-
-// use MGWebGroup\PriceHistoryProvider;
-// use MGWebGroup\PriceHistory;
-
-// class OHLCVProvider 
-// {}
-
-// class TickerTapeProvider
-// {}
-
-// $provider = new OHLCVProvider;
-// $fromDate = new \DateTime();
-// $toDate = null;
-
-// $priceHistory = new PriceHistory();
-
-// echo $priceHistory->downloadOHLCV($fromDate, $toDate, $provider);
-// $priceHistory->downloadTickerTape($fromDate, $toDate, new TickerTapeProvider);

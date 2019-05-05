@@ -12,16 +12,46 @@
 namespace MGWebGroup\PriceData;
 
 use MGWebGroup\PriceData\OHLCVProviderInterface;
+use Scheb\YahooFinanceApi\ApiClient;
+use Scheb\YahooFinanceApi\ApiClientFactory;
+use MGWebGroup\PriceData\PriceDataException;
+
 
 class OHLCVFromYahoo implements OHLCVProviderInterface
 {
 	public function downloadHistory($symbol, $fromDate, $toDate, $unit)
 	{
-		$out = [
-			array('Date' => '2019-05-01', 'Open' => 10.99, 'High' => 13, 'Low' => 10, 'Close' => 13, 'Volume' => 1000),
-			array('Date' => '2019-05-02', 'Open' => 11.99, 'High' => 14, 'Low' => 10, 'Close' => 14, 'Volume' => 2000),
-		];
-		return $out;
+        $api = ApiClientFactory::createApiClient();
+
+        switch ($unit) 
+        {
+        	case OHLCVProviderInterface::UNIT_DAILY:
+        		$interval = ApiClient::INTERVAL_1_DAY;
+        		break;
+        	case OHLCVProviderInterface::UNIT_WEEKLY:
+        		$interval = ApiClient::INTERVAL_1_WEEK;
+        		break;
+        	case OHLCVProviderInterface::UNIT_MONTHLY:
+        		$interval = ApiClient::INTERVAL_1_MONTH;
+        		break;
+        	default:
+        		throw new PriceDataException(sprintf('Unit of %s for OHLCV history is NOT supported in Yahoo provider.', $unit));
+        }
+
+        $result = $api->getHistoricalData($symbol, $interval, $fromDate, $toDate);
+
+        return array_map(function($item) {
+        	$close = ($item->getAdjClose() != $item->getClose())? $item->getAdjClose() : $item->getClose();
+        	return [
+        		'Date' => $item->getDate()->format('U'),
+        		'Open' => round($item->getOpen(), 2),
+        		'High' => round($item->getHigh(), 2),
+        		'Low'  => round($item->getLow(), 2),
+        		'Close' => round($close),
+        		'Volume' => $item->getVolume(),
+        	];
+        }, $result);
+
 	}
 
 }

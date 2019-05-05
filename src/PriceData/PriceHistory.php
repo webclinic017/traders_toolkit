@@ -12,6 +12,7 @@
 namespace MGWebGroup\PriceData;
 
 use MGWebGroup\PriceData\OHLCVProviderInterface;
+use MGWebGroup\PriceData\PriceDataException;
 
 /**
 * Handles only historical price information without any instant or current quotes.
@@ -60,7 +61,7 @@ class PriceHistory
 	* Market commodity to get prices about
 	* @var string
 	*/
-	public $symbol;
+	private $symbol;
 
 
 	/**
@@ -68,15 +69,17 @@ class PriceHistory
 	* @param string $OHLCVLocation path/with/filename
 	* @param TickerTapeProvider $tickerTapeProvider object
 	* @param string $tickerTapeLocation path/with/filename
-
+	* @param string $symbol
 	*/	
-	public function __construct(OHLCVProviderInterface $OHLCVProvider, $OHLCVLocation, TickerTapeProviderInterface $tickerTapeProvider, $tickerTapeLocation)
+	public function __construct(OHLCVProviderInterface $OHLCVProvider, $OHLCVLocation, TickerTapeProviderInterface $tickerTapeProvider, $tickerTapeLocation, $symbol=null)
 	{
 		$this->OHLCVProvider = $OHLCVProvider;
 		$this->tickerTapeProvider = $tickerTapeProvider;
 
-		$this->OHLCVResource = fopen($OHLCVLocation, 'r');
-		$this->tickerTapeResource = fopen($tickerTapeLocation, 'r');
+		if ((!$this->OHLCVResource = @fopen($OHLCVLocation, 'r')) || !is_file($OHLCVLocation)) throw new PriceDataException(sprintf('Failed to open OHLCV Resource at %s', $OHLCVLocation));
+		if ((!$this->tickerTapeResource = @fopen($tickerTapeLocation, 'r')) || !is_file($tickerTapeLocation)) throw new PriceDataException(sprintf('Failed to open Ticker Tape Resource at %s', $tickerTapeLocation));
+
+		$this->setSymbol($symbol);
 	}
 
 	/**
@@ -85,12 +88,11 @@ class PriceHistory
 	* @param DateTime | null $toDate
 	* @return array(<timestamp> => [price, size])?? To be established when TickerTapeProvider is working.
 	*/
-	public function downloadTickerTape($fromDate, $toDate=null) {
-		if (empty($this->symbol)) throw new \Exception('No symbol defined for downloading of the ticker tape.');
-
+	public function downloadTickerTape($fromDate, $toDate=null) 
+	{
 		if (!($toDate instanceof \DateTime)) $toDate = new \DateTime();
 
-		return $this->tickerTapeProvider->download($this->symbol, $fromDate, $toDate);
+		return $this->tickerTapeProvider->downloadTape($this->symbol, $fromDate, $toDate);
 	}
 
 	/**
@@ -103,6 +105,8 @@ class PriceHistory
 			// save values into the $tickerTapeResource
 			//...
 		}
+
+		return false;
 	}
 
 	/**
@@ -129,15 +133,43 @@ class PriceHistory
 
 	/**
 	* Many online services just provide OHLCV format. This method is included to only download OHLCV information.
-	* @param OHLCVProvider UNIT_* constant $unit
+	* @param string which matches one of the OHLCVProviderInterface UNIT_* constants
 	* @param DateTime $fromDate
 	* @param DateTime $toDate | null
 	* @return array 
 	*/
-	public function downloadOHLCV($unit, $fromDate, $toDate=null)
+	public function downloadOHLCV($unit, $fromDate, $toDate=null, $sortOrder=null)
 	{
-		return [];
+		if (!($toDate instanceof \DateTime)) $toDate = new \DateTime();
+
+		$result = $this->OHLCVProvider->downloadHistory($this->symbol, $fromDate, $toDate, $unit);
+
+		return $result;
 	}
 
+	/**
+	* Performs sorting of the OHLCV history by Date
+	* @param array $history
+	* @param integer $sortOrder SORT_ASC or SORT_DESC native PHP constants
+	* @return void. Works on the $history array by reference
+	*/
+	public function sortHistory(&$history, $sortOrder)
+	{
+		$date = array_column($history, 'Date');
 
+		array_multisort($date, $sortOrder, SORT_REGULAR, $history);
+	}
+
+	public function setSymbol($symbol)
+	{
+		if (preg_match('/\./', $symbol) == 1) throw new PriceDataException(sprintf('Supplied symbol %s cannot contain dots', $symbol));
+		if (!$symbol) throw new PriceDataException('Trying to set symbol for the Price History, but no symbol provided');
+
+		$this->symbol = $symbol;
+	}
+
+	public function getSymbol()
+	{
+		return $this->symbol;
+	}
 }
