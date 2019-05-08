@@ -39,13 +39,13 @@ class PriceHistory
 	* Resource which stores tick data relative to project root
 	* @var resource handle
 	*/
-	protected $tickerTapeResource;
+	public $tickerTapeResource;
 
 	/**
 	* Resource which stores tick data relative to project root
 	* @var resource handle
 	*/
-	protected $OHLCVResource;
+	public $OHLCVResource;
 
 	/**
 	* @var TickerTapeProvider
@@ -63,8 +63,16 @@ class PriceHistory
 	*/
 	private $symbol;
 
+	/**
+	* History headers
+	* @var array
+	*/
+	public $historyHeaders;
+
 
 	/**
+	* Constructor will set historyHeaders to the default ones provided in the OHLCVProvider. You can change them later if you need to, via simple assignment to the 
+	*  public prop $historyHeaders.
 	* @param OHLCVProvider $OHLCVProvider object
 	* @param string $OHLCVLocation path/with/filename
 	* @param TickerTapeProvider $tickerTapeProvider object
@@ -74,10 +82,18 @@ class PriceHistory
 	public function __construct(OHLCVProviderInterface $OHLCVProvider, $OHLCVLocation, TickerTapeProviderInterface $tickerTapeProvider, $tickerTapeLocation, $symbol=null)
 	{
 		$this->OHLCVProvider = $OHLCVProvider;
-		$this->tickerTapeProvider = $tickerTapeProvider;
+		$this->historyHeaders = [
+			$OHLCVProvider::COLUMN_0, 
+			$OHLCVProvider::COLUMN_1, 
+			$OHLCVProvider::COLUMN_2, 
+			$OHLCVProvider::COLUMN_3,
+			$OHLCVProvider::COLUMN_4,
+			$OHLCVProvider::COLUMN_5
+		];
+		$this->OHLCVResource = $this->createResourceFromLocation($OHLCVLocation);
 
-		if ((!$this->OHLCVResource = @fopen($OHLCVLocation, 'r')) || !is_file($OHLCVLocation)) throw new PriceDataException(sprintf('Failed to open OHLCV Resource at %s', $OHLCVLocation));
-		if ((!$this->tickerTapeResource = @fopen($tickerTapeLocation, 'r')) || !is_file($tickerTapeLocation)) throw new PriceDataException(sprintf('Failed to open Ticker Tape Resource at %s', $tickerTapeLocation));
+		$this->tickerTapeProvider = $tickerTapeProvider;
+		$this->tickerTapeResource = $this->createResourceFromLocation($tickerTapeLocation);
 
 		$this->setSymbol($symbol);
 	}
@@ -150,14 +166,69 @@ class PriceHistory
 	/**
 	* Performs sorting of the OHLCV history by Date
 	* @param array $history
+	* @param string $sortColumn
 	* @param integer $sortOrder SORT_ASC or SORT_DESC native PHP constants
 	* @return void. Works on the $history array by reference
 	*/
-	public function sortHistory(&$history, $sortOrder)
+	public function sortHistory(&$history, $sortColumn, $sortOrder=SORT_ASC)
 	{
-		$date = array_column($history, 'Date');
+		$column = array_column($history, $sortColumn);
 
-		array_multisort($date, $sortOrder, SORT_REGULAR, $history);
+		array_multisort($column, $sortOrder, SORT_REGULAR, $history);
+	}
+
+	/**
+	* Saves data with given headers as a csv file. Will truncate existing file, then write
+	* @param array $data 
+	* @param array $headers
+	* @return array map of file (<line_number> => <cumulative_length>, ...)
+	*/
+	public function saveData($data, $headers = [], $handle)
+	{
+		ftruncate ($handle , 0);
+		$map = [];
+		$cumulativeLength = 0;
+
+		if (!empty($headers)) {
+			$cumulativeLength += fwrite($handle, implode(',', $headers).PHP_EOL);
+			$map[] = $cumulativeLength;
+		}
+
+		foreach ($data as $fields) {
+			$cumulativeLength += fwrite($handle, implode(',', $fields).PHP_EOL);
+			$map[] = $cumulativeLength;
+		}
+
+		return $map;
+	}
+
+	/**
+	* Appends OHLCV history to $OHLCVResource. 
+	* @param array $history OHLCV history by reference
+	* @return boolean true on success, false on failure
+	*/
+	public function appendData($data, $handle)
+	{
+	}
+
+	/**
+	* Given a record number, updates line in the history file with new line
+	* @param integer $recordNumber
+	* @param array $data
+	*/
+	public function updateData($recordNumber, $data, $handle) 
+	{
+
+	}
+
+	public function deleteData($recordNumber, $handle)
+	{
+
+	}
+
+	public function insertData($insertAfterRecordNumber, $data, $handle)
+	{
+
 	}
 
 	public function setSymbol($symbol)
@@ -171,5 +242,19 @@ class PriceHistory
 	public function getSymbol()
 	{
 		return $this->symbol;
+	}
+
+	/**
+	* @param string Fully Qualified Name (FQN) as in path/to/resource/file.ext
+	* @return resource handle
+	*/
+	private function createResourceFromLocation($FQN)
+	{
+		if (!is_dir($dirName = pathinfo($FQN, PATHINFO_DIRNAME))) throw new PriceDataException(sprintf('`%s` is not a directory', $dirName));
+
+		// Open the file for reading and writing. If the file does not exist, it is created. If it exists, it is neither truncated, nor the call to this function fails. The file pointer is positioned on the beginning of the file.
+		if (!$resource = @fopen($FQN, 'c+')) throw new PriceDataException(sprintf('Failed to open resource at %s', $FQN));
+
+		return $resource;
 	}
 }

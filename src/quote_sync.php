@@ -5,8 +5,10 @@ use MGWebGroup\PriceData\TickerTape_Null;
 use MGWebGroup\PriceData\OHLCVFromYahoo;
 use MGWebGroup\PriceData\PriceHistory;
 use MGWebGroup\PriceData\PriceDataException;
+use MGWebGroup\General\GeneralException;
+use MGWebGroup\General\CSVManager;
 
-$symbol = 'AAPL';
+$symbol = 'A';
 
 $tickerTape = new TickerTape_Null(); // this is a plug class for non-existent TickerTape func
 $tickerTapeLocation = __DIR__.'/../data/source/ptv/null';
@@ -14,38 +16,68 @@ $tickerTapeLocation = __DIR__.'/../data/source/ptv/null';
 $OHLCVFromYahoo = new OHLCVFromYahoo();
 $OHLCVLocation = __DIR__.'/../data/source/ohlcv/'.$symbol.'_d.csv';
 
-try { // see if file locations can be opened
-	$ph = new PriceHistory($OHLCVFromYahoo, $OHLCVLocation, $tickerTape, $tickerTapeLocation, $symbol);
-	$fromDate = new \DateTime('10 days ago');
-	// $toDate = null;
-	$history = $ph->downloadOHLCV($unit = 'P1D', $fromDate, $toDate = null);
-	// var_dump($history);
-	// echo PHP_EOL;
-	// echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume').PHP_EOL;
-	// foreach ($history as $record) {
-	// 	echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', date('Y-m-d H:i:s', $record['Date']), $record['Open'], $record['High'], $record['Low'], $record['Close'], $record['Volume']).PHP_EOL;
-	// }
-	// echo PHP_EOL;
-	// echo 'Sorted:'.PHP_EOL;
-	// $history = $ph->sortHistory($history, SORT_DESC);
-	$ph->sortHistory($history, SORT_DESC);
-	// echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume').PHP_EOL;
-	// foreach ($history as $record) {
-	// 	echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', date('Y-m-d H:i:s', $record['Date']), $record['Open'], $record['High'], $record['Low'], $record['Close'], $record['Volume']).PHP_EOL;
-	// }
-	// echo PHP_EOL;
-	
+// try { // see if file locations can be opened
+// 	$ph = new PriceHistory($OHLCVFromYahoo, $OHLCVLocation, $tickerTape, $tickerTapeLocation, $symbol);
+// 	// exit();
+// 	$fromDate = new \DateTime('10 days ago');
+// 	// $toDate = null;
+// 	// $history = $ph->downloadOHLCV($unit = 'P1D', $fromDate, $toDate = null);
+// 	// printHistory($history);
+
+// 	// $ph->sortHistory($history, 'Timestamp', SORT_DESC);
+// 	// echo 'Sorted:'.PHP_EOL;
+// 	// printHistory($history);
+
+// 	$history = [[123456,1,2,3,4,5], [123457,6,7,8,9,10]];
+// 	$map = $ph->saveData($history, $ph->historyHeaders, $ph->OHLCVResource);
+
+// 	var_dump($map); 
 
 
-} catch (PriceDataException $e) {
+// } catch (PriceDataException $e) {
+// 	var_dump($e->getMessage());
+// 	// log message
+// 	exit(1);
+// }
+
+try {
+
+	$csv = new CsvManager($OHLCVLocation);
+	// var_dump($csv->getMap()); exit();
+	// $csv->seek(10);
+	// var_dump($csv->current());
+
+	$history = [[123456,1,2,3,4,5], [123457,6,7,8,9,10]];
+	$headers = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']; //Timestamp,Open,High,Low,Close,Volume
+
+	$csv->importData($history, $headers);
+	// $csv->seek(2);
+	// var_dump($csv->current()); exit();
+
+	$insertedArray = [123458,10,20,30,40,50];
+	$csv[] = $insertedArray;
+
+	var_dump($csv->getMap());
+	$modifiedArray = [123459,100,200,300,400,500];
+	$csv[0] = $modifiedArray;
+
+
+} catch (GeneralException $e) {
 	var_dump($e->getMessage());
-	// log message
 	exit(1);
 }
 
 // $ph->setSymbol($symbol);
 
-
+function printHistory ($history)
+{
+	echo PHP_EOL;
+	echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', 'Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume').PHP_EOL;
+	foreach ($history as $record) {
+		echo sprintf('%20.20s %15.15s %15.15s %15.15s %15.15s %15.15s', date('Y-m-d H:i:s', $record['Timestamp']), $record['Open'], $record['High'], $record['Low'], $record['Close'], $record['Volume']).PHP_EOL;
+	}
+	echo PHP_EOL;
+}
 
 
 
