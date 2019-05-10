@@ -39,9 +39,15 @@ class Instrument
      */
     private $oHLCVHistories;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVQuote", mappedBy="symbol", orphanRemoval=true)
+     */
+    private $oHLCVQuotes;
+
     public function __construct()
     {
         $this->oHLCVHistories = new ArrayCollection();
+        $this->oHLCVQuotes = new ArrayCollection();
     }
 
 
@@ -111,6 +117,37 @@ class Instrument
             // set the owning side to null (unless already changed)
             if ($oHLCVHistory->getSymbol() === $this) {
                 $oHLCVHistory->setSymbol(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|OHLCVQuote[]
+     */
+    public function getOHLCVQuotes(): Collection
+    {
+        return $this->oHLCVQuotes;
+    }
+
+    public function addOHLCVQuote(OHLCVQuote $oHLCVQuote): self
+    {
+        if (!$this->oHLCVQuotes->contains($oHLCVQuote)) {
+            $this->oHLCVQuotes[] = $oHLCVQuote;
+            $oHLCVQuote->setSymbol($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOHLCVQuote(OHLCVQuote $oHLCVQuote): self
+    {
+        if ($this->oHLCVQuotes->contains($oHLCVQuote)) {
+            $this->oHLCVQuotes->removeElement($oHLCVQuote);
+            // set the owning side to null (unless already changed)
+            if ($oHLCVQuote->getSymbol() === $this) {
+                $oHLCVQuote->setSymbol(null);
             }
         }
 

@@ -1,0 +1,50 @@
+<?php
+abstract class PriceProvider
+{
+	abstract public function downloadHistory($symbol, $fromDate, $toDate, $options);
+
+ 	abstract public function saveHistory($history);
+ 
+ 	abstract public function mergeHistory($symbol, $history);
+ 
+ 	abstract public function retrieveHistory($symbol, $fromDate, $toDate);
+ 
+ 	abstract public function downloadQuote($symbol);
+ 
+ 	abstract public function saveQuote($quote);
+ 
+ 	abstract public function addQuoteToHistory($quote, $history);
+ 
+	abstract public function retrieveQuote($symbol);
+
+	public function isTradingDay($date)
+	{
+		// use Yasumi here
+	}
+}
+
+class OHLCV_Yahoo extends PriceProvider
+{
+	// uses OHLCVHistory Entity
+	// uses OHLCVQuote Entity
+}
+
+class Ticker_IB extends PriceProvider
+{
+
+}
+
+class OHLCV_Scanner
+{
+	private $date;
+
+	private $universe;
+
+	// private $history;
+	//...
+	public function is_hammer() {
+
+	}
+
+	// pattern scans
+}
