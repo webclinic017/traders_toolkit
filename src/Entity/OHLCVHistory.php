@@ -57,6 +57,11 @@ class OHLCVHistory
      */
     private $timestamp;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $provider;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,6 +159,18 @@ class OHLCVHistory
     public function setTimestamp(\DateTimeInterface $timestamp): self
     {
         $this->timestamp = $timestamp;
+
+        return $this;
+    }
+
+    public function getProvider(): ?string
+    {
+        return $this->provider;
+    }
+
+    public function setProvider(?string $provider): self
+    {
+        $this->provider = $provider;
 
         return $this;
     }
