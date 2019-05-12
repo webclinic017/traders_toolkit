@@ -45,7 +45,7 @@ class OHLCVHistory
      * @ORM\ManyToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVHistories")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $symbol;
+    private $instrument;
 
     /**
      * @ORM\Column(type="dateinterval")
@@ -127,14 +127,14 @@ class OHLCVHistory
         return $this;
     }
 
-    public function getSymbol(): ?Instrument
+    public function getInsrument(): ?Instrument
     {
-        return $this->symbol;
+        return $this->instrument;
     }
 
-    public function setSymbol(?Instrument $symbol): self
+    public function setInstrument(?Instrument $instrument): self
     {
-        $this->symbol = $symbol;
+        $this->instrument = $instrument;
 
         return $this;
     }

@@ -35,12 +35,12 @@ class Instrument
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVHistory", mappedBy="symbol", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVHistory", mappedBy="instrument", orphanRemoval=true)
      */
     private $oHLCVHistories;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVQuote", mappedBy="symbol", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVQuote", mappedBy="instrument", orphanRemoval=true)
      */
     private $oHLCVQuotes;
 

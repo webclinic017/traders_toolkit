@@ -29,7 +29,7 @@ class InstrumentFixtures extends Fixture
         // var_dump($output->getVerbosity()); exit();
         $output->getFormatter()->setStyle('info-init', new OutputFormatterStyle('white', 'blue'));
         $output->getFormatter()->setStyle('info-end', new OutputFormatterStyle('green', 'blue'));
-        $formatter = new FormatterHelper();
+        // $formatter = new FormatterHelper();
         // $output->writeln('<fg=yellow>Symbol</>,<fg=yellow>Name</>,Weight,<fg=yellow>Industry</>,Shares Held,SPDR Fund,Beta,E1,E2,E3,E4'); exit();
         $output->writeln(sprintf('<info-init>Will import list of instruments from %s file</>', self::FILE));
 
@@ -42,15 +42,17 @@ class InstrumentFixtures extends Fixture
         $numberOfLines = 0;
         $lines = $this->getLines(self::FILE);
 
-        
     	foreach ($lines as $line) {
             $fields = explode(',', $line);
         	$instrument = new Instrument();
-        	$instrument->setSymbol($fields[0]);
+            $symbol = strtoupper($fields[0]);
+        	$instrument->setSymbol($symbol);
         	$instrument->setName($fields[1]);
         	$manager->persist($instrument);
 
-            $output->writeln(sprintf('Imported symbol=%s', $fields[0]));
+            $this->addReference($symbol, $instrument);
+
+            $output->writeln(sprintf('Imported symbol=%s', $symbol));
     	}
 
         $manager->flush();
@@ -59,7 +61,7 @@ class InstrumentFixtures extends Fixture
         if ($numberOfLines > 0 ) { 
             $message = sprintf('<info-end>Imported %d symbols into Instruments table.</>', $numberOfLines);
         } else {
-            $message = sprintf(format('<info-end>No records found in the %s</>', self::FILE));
+            $message = sprintf('<info-end>No records found in the %s</>', self::FILE);
         }
 
         $output->writeln($message.PHP_EOL);
@@ -68,6 +70,7 @@ class InstrumentFixtures extends Fixture
 
     /**
     * Generator
+    * Skips first line as header
     * https://www.php.net/manual/en/language.generators.overview.php
     */
     private function getLines($file) {
@@ -83,6 +86,6 @@ class InstrumentFixtures extends Fixture
 	        fclose($f);
 	    }
 
-        return $counter;
+        return $counter-1;
 	}
 }
