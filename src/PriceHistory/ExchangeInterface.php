@@ -10,7 +10,11 @@ interface ExchangeInterface
 	 */
 	public function isTradingDay($date);
 
-	public function isOpen($DateTime);
+	/**
+	 * @param \DateTime $datetime
+	 * @return bool
+	 */
+	public function isOpen($datetime);
 
 	public function getTradedInstruments();
 
