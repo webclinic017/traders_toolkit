@@ -5,6 +5,7 @@ namespace App\Tests\PriceHistory;
 // use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\PriceHistory\Exchange_NYSE;
+use App\Repository\InstrumentRepository;
 // use App\Service\Holidays;
 // use App\Service\Yasumi;
 use Yasumi\Yasumi;
@@ -13,21 +14,22 @@ class Exchange_NYSETest extends KernelTestCase
 {
     private $SUT;
 
+    // private $doctrine;
+
     /**
      * Details on how to access services in tests:
      * https://symfony.com/blog/new-in-symfony-4-1-simpler-service-testing
      */
 	protected function setUp(): void
     {
-        // self::bootKernel();
+        self::bootKernel();
         // $container = self::$container;
         // $container = self::$kernel->getContainer();
-        // $container = self::$container->get('test.service_container');
+        $container = self::$container->get('test.service_container');
         // var_dump($container->has('test.service_container')); exit();
 
-        // $holidaysService = $container->get(Holidays::class);
-        // exit();
-        $this->SUT = new Exchange_NYSE();
+        $this->SUT = $container->get('app.exchange.nyse');
+        // $this->doctrine = $container->get('doctrine');
     }
 
     public function testIntro()
@@ -243,6 +245,28 @@ class Exchange_NYSETest extends KernelTestCase
         $date->add($interval);
         $this->assertFalse($this->SUT->isOpen($date));
     }
+
+    /**
+     * Testing isTraded
+     */
+    public function test30()
+    {
+        $this->assertTrue($this->SUT->isTraded('MCD'));
+
+        $this->assertFalse($this->SUT->isTraded('SPY1'));
+    }
+
+    /**
+     * Testing getTradedInsruments
+     */
+    public function test40()
+    {
+        // $repository = $this->doctrine->getRepository(InstrumentRepository::class);
+
+        $instruments = $this->SUT->getTradedInstruments();
+        var_dump(count($instruments));
+    }
+
 
     protected function tearDown(): void
     {

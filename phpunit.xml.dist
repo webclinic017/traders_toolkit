@@ -16,8 +16,8 @@
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Price History">
+            <directory>tests/PriceHistory</directory>
         </testsuite>
     </testsuites>
 

@@ -44,6 +44,11 @@ class Instrument
      */
     private $oHLCVQuotes;
 
+    /**
+     * @ORM\Column(type="string", length=80, nullable=true)
+     */
+    private $exchange;
+
     public function __construct()
     {
         $this->oHLCVHistories = new ArrayCollection();
@@ -150,6 +155,18 @@ class Instrument
                 $oHLCVQuote->setSymbol(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getExchange(): ?string
+    {
+        return $this->exchange;
+    }
+
+    public function setExchange(?string $exchange): self
+    {
+        $this->exchange = $exchange;
 
         return $this;
     }

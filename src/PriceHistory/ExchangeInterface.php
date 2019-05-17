@@ -18,10 +18,15 @@ interface ExchangeInterface
 
 	/**
 	 * Queries Instruments table for which Exchange they belong to
-	 * @return array
+	 * @return array of Instrument Entities
 	 */
 	public function getTradedInstruments();
 
-	public function isTraded($instrument);
+	/**
+	 * Looks up given symbol
+	 * @param string $symbol
+	 * @return bool
+	 */
+	public function isTraded($symbol);
 
 }

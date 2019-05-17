@@ -1,17 +1,17 @@
 <?php
 
-namespace App\PriceHistory;
+namespace App\Service;
 
 use Yasumi\Yasumi;
 // use Yasumi\Filters\OfficialHolidaysFilter;
 use App\PriceHistory\ExchangeInterface;
 use App\Repository\InstrumentRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
-// use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 
-class Exchange_NYSE extends ServiceEntityRepository implements ExchangeInterface
+class Exchange_NYSE implements ExchangeInterface
 {
+	const EXCHANGE = 'NYSE';
+	
 	/**
 	 * @var Yasumi holidays object
 	 */
@@ -19,15 +19,15 @@ class Exchange_NYSE extends ServiceEntityRepository implements ExchangeInterface
 
 	private $timeZone = 'America/New_York';
 
-	private $exchangeSymbol = 'NYSE';
+
+	private $instrumentRepository;
 
 
-	public function __construct()
+	public function __construct(InstrumentRepository $instrumentRepository)
 	{
-		// parent::__construct($registry, \App\Entity\Instrument::class);
+		$this->instrumentRepository = $instrumentRepository;
 
 		$date = new \DateTime();
-		// $this->initYear = (int)$date->format('Y');
 		
 		$this->holidaysProvider = Yasumi::create('USA', (int)$date->format('Y'));
 		
@@ -97,12 +97,12 @@ class Exchange_NYSE extends ServiceEntityRepository implements ExchangeInterface
 
 	public function getTradedInstruments()
 	{
-
+		return ($this->instrumentRepository->findBy(['exchange' => self::EXCHANGE]));
 	}
 
-	public function isTraded($instrument) 
+	public function isTraded($symbol) 
 	{
-
+		return ($this->instrumentRepository->findOneBy(['symbol' => $symbol, 'exchange' => self::EXCHANGE]))? true : false;
 	}
 
 	private function matchHolidays($year)
