@@ -3,12 +3,14 @@
 namespace App\PriceHistory;
 
 use Yasumi\Yasumi;
-use Yasumi\Filters\OfficialHolidaysFilter;
-// use App\Service\Holidays;
+// use Yasumi\Filters\OfficialHolidaysFilter;
 use App\PriceHistory\ExchangeInterface;
+use App\Repository\InstrumentRepository;
+use Symfony\Bridge\Doctrine\RegistryInterface;
+// use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 
-class Exchange_NYSE implements ExchangeInterface
+class Exchange_NYSE extends ServiceEntityRepository implements ExchangeInterface
 {
 	/**
 	 * @var Yasumi holidays object
@@ -17,14 +19,13 @@ class Exchange_NYSE implements ExchangeInterface
 
 	private $timeZone = 'America/New_York';
 
-	/**
-	 * @var ArrayIterator iterator for the holidays to be used in foreach
-	 */
-	// public $holidays;
+	private $exchangeSymbol = 'NYSE';
 
 
 	public function __construct()
 	{
+		// parent::__construct($registry, \App\Entity\Instrument::class);
+
 		$date = new \DateTime();
 		// $this->initYear = (int)$date->format('Y');
 		
@@ -61,12 +62,6 @@ class Exchange_NYSE implements ExchangeInterface
 	public function isOpen($datetime)
 	{
 		$secondsOffsetFromUTC = $datetime->format('Z');
-		// $interval = new DateInterval(sprintf('PT%dS', $secondsOffsetFromUTC));
-		// $convertSecondsToSwatch = 999/(24*3600);
-		// foreach ($this->holidays as $key => $date) {
-		// 	echo sprintf('%s %s', $key, $date->format('c')).PHP_EOL;
-		// }
-		// exit();
 
 		// check for holidays and weekends
 		if (!$this->isTradingDay($datetime)) { 

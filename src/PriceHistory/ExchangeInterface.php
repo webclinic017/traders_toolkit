@@ -16,6 +16,10 @@ interface ExchangeInterface
 	 */
 	public function isOpen($datetime);
 
+	/**
+	 * Queries Instruments table for which Exchange they belong to
+	 * @return array
+	 */
 	public function getTradedInstruments();
 
 	public function isTraded($instrument);

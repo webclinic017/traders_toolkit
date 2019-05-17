@@ -50,7 +50,7 @@ class InstrumentFixtures extends Fixture
         	$instrument->setName($fields[1]);
         	$manager->persist($instrument);
 
-            $this->addReference($symbol, $instrument);
+            // $this->addReference($symbol, $instrument);
 
             $output->writeln(sprintf('Imported symbol=%s', $symbol));
     	}

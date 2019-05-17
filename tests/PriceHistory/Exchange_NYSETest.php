@@ -19,8 +19,8 @@ class Exchange_NYSETest extends KernelTestCase
      */
 	protected function setUp(): void
     {
-        self::bootKernel();
-        $container = self::$container;
+        // self::bootKernel();
+        // $container = self::$container;
         // $container = self::$kernel->getContainer();
         // $container = self::$container->get('test.service_container');
         // var_dump($container->has('test.service_container')); exit();

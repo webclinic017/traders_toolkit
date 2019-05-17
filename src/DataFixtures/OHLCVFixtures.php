@@ -18,8 +18,11 @@ class OHLCVFixtures extends Fixture
     const SUFFIX_DAILY = '_d';
     const SUFFIX_WEEKLY = '_w';
 
+    private $manager;
+
     public function load(ObjectManager $manager)
     {
+        $this->manager = $manager;
         $output = new ConsoleOutput();
         $output->getFormatter()->setStyle('info-init', new OutputFormatterStyle('white', 'blue'));
         $output->getFormatter()->setStyle('info-end', new OutputFormatterStyle('green', 'blue'));
@@ -34,14 +37,14 @@ class OHLCVFixtures extends Fixture
         $output->writeln('Looking for daily OHLCV price files...');
         $suffix = self::SUFFIX_DAILY.'.csv';
 
-        $importedFiles = $this->importFiles($suffix, $output, $manager);    
+        $importedFiles = $this->importFiles($suffix, $output);
 
         $output->writeln(sprintf('<info-end>Imported %d daily files</>', $importedFiles));
 
         // load weekly
         $suffix = self::SUFFIX_WEEKLY.'.csv';
 
-        $importedFiles = $this->importFiles($suffix, $output, $manager);    
+        $importedFiles = $this->importFiles($suffix, $output);
 
         $output->writeln(sprintf('<info-end>Imported %d weekly files</>', $importedFiles));
 
@@ -53,8 +56,9 @@ class OHLCVFixtures extends Fixture
      * @return integer number of files imported
      */
     
-    private function importFiles($suffix, $output, $manager) 
+    private function importFiles($suffix, $output) 
     {
+        $repository = $this->manager->getRepository(\App\Entity\Instrument::class);
         // Build filemap by mask
         $finder = new Finder();
         $finder->in(self::DIRECTORY)->files()->name('*'.$suffix);
@@ -64,38 +68,44 @@ class OHLCVFixtures extends Fixture
         $importedFiles = 0;
         // foreach file select the symbol
         foreach ($finder as $file) {
-            $symbol = strtoupper($file->getBasename($suffix));
-            $importedRecords = 0;
+            if ($importedFiles >= 0) {
+                $symbol = strtoupper($file->getBasename($suffix));
+                $importedRecords = 0;
 
-            if ($instrument = $this->getReference($symbol)) {
-                // if exists load
-                $fileName = $file->getPath().'/'.$file->getBasename();
-                $lines = $this->getLines($fileName);
-                foreach ($lines as $line) {
-                    $fields = explode(',', $line);
-                    // var_dump($fileName, $fields);
-                    $OHLCVHistory = new OHLCVHistory();
-                    // $OHLCVHistory->setTimestamp(strtotime($fields[0]));
-                    $OHLCVHistory->setTimestamp(new \DateTime($fields[0]));
-                    $OHLCVHistory->setOpen($fields[1]);
-                    $OHLCVHistory->setHigh($fields[2]);
-                    $OHLCVHistory->setLow($fields[3]);
-                    $OHLCVHistory->setClose($fields[4]);
-                    $OHLCVHistory->setVolume((int)$fields[5]);
-                    $OHLCVHistory->setInstrument($instrument);
-                    $OHLCVHistory->setTimeinterval(new \DateInterval('P1D'));
+                // look for instrument without the seeders reference
+                $instrument = $repository->findOneBy(['symbol' => $symbol]);
+                // var_dump($instrument); exit();
+                // if ($instrument = $this->getReference($symbol)) {
+                if ($instrument) {
+                    // if exists load
+                    $fileName = $file->getPath().'/'.$file->getBasename();
+                    $lines = $this->getLines($fileName);
+                    foreach ($lines as $line) {
+                        $fields = explode(',', $line);
+                        // var_dump($fileName, $fields);
+                        $OHLCVHistory = new OHLCVHistory();
+                        // $OHLCVHistory->setTimestamp(strtotime($fields[0]));
+                        $OHLCVHistory->setTimestamp(new \DateTime($fields[0]));
+                        $OHLCVHistory->setOpen($fields[1]);
+                        $OHLCVHistory->setHigh($fields[2]);
+                        $OHLCVHistory->setLow($fields[3]);
+                        $OHLCVHistory->setClose($fields[4]);
+                        $OHLCVHistory->setVolume((int)$fields[5]);
+                        $OHLCVHistory->setInstrument($instrument);
+                        $OHLCVHistory->setTimeinterval(new \DateInterval('P1D'));
 
-                    $manager->persist($OHLCVHistory);
+                        $this->manager->persist($OHLCVHistory);
 
-                    $importedRecords++;
+                        $importedRecords++;
+                    }
+                    $this->manager->flush();
+                    $importedFiles++;
+                    $message = sprintf('%3d %s: imported %d of %d price records', $importedFiles, $file->getBasename(), $importedRecords, $lines->getReturn());
+                } else {
+                    $message = sprintf('%s: instrument record was not imported, skipping file', $file->getBasename());
                 }
-                $manager->flush();
-                $message = sprintf('%3d %s: imported %d of %d price records', $importedFiles, $file->getBasename(), $importedRecords, $lines->getReturn());
-            } else {
-                $message = sprintf('%s: instrument record was not imported, skipping file', $file->getBasename());
+                $output->writeln($message);
             }
-            $output->writeln($message);
-            $importedFiles++;
         }
 
         return $importedFiles;
