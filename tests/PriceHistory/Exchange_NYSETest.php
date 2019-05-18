@@ -261,10 +261,14 @@ class Exchange_NYSETest extends KernelTestCase
      */
     public function test40()
     {
-        // $repository = $this->doctrine->getRepository(InstrumentRepository::class);
+        $result = $this->SUT->getTradedInstruments();
+        $nyse = file_get_contents('data/source/nyse_companylist.csv');
+        // var_dump($nyse); exit();
+        foreach ($result as $instrument) {
+            $needle = sprintf('"%s"', $instrument->getSymbol());
+            $this->assertTrue(false != strpos($nyse, $needle), sprintf( 'symbol=%s was not found in list of NYSE symbols.', $instrument->getSymbol() ) );
+        }
 
-        $instruments = $this->SUT->getTradedInstruments();
-        var_dump(count($instruments));
     }
 
 
@@ -272,4 +276,15 @@ class Exchange_NYSETest extends KernelTestCase
     {
         // fwrite(STDOUT, __METHOD__ . "\n");
     }
+
+    // private function getLines($file) {
+    // $f = fopen($file, 'r');
+    //     try {
+    //         while ($line = fgets($f)) {
+    //             yield $line;
+    //         }
+    //     } finally {
+    //         fclose($f);
+    //     }
+    // }
 }
