@@ -29,7 +29,8 @@ services:
     #     resource: '../src/Service/YasumiHolidays.php'
     #     autowire: true
     #     public: true
-    app.exchange.nyse: 
-        alias: App\Service\Exchange_NYSE
+    App\Service\Exchange_NYSE:
         public: true
+        # autowire: true
+        # resource: '../src/Service/Exchange_NYSE.php'
         

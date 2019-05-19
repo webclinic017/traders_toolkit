@@ -4,11 +4,11 @@ namespace App\Tests\PriceHistory;
 
 // use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use App\PriceHistory\Exchange_NYSE;
-use App\Repository\InstrumentRepository;
+use App\Service\Exchange_NYSE;
+// use App\Repository\InstrumentRepository;
 // use App\Service\Holidays;
 // use App\Service\Yasumi;
-use Yasumi\Yasumi;
+// use Yasumi\Yasumi;
 
 class Exchange_NYSETest extends KernelTestCase
 {
@@ -28,7 +28,8 @@ class Exchange_NYSETest extends KernelTestCase
         $container = self::$container->get('test.service_container');
         // var_dump($container->has('test.service_container')); exit();
 
-        $this->SUT = $container->get('app.exchange.nyse');
+        // $this->SUT = $container->get('app.exchange.nyse');
+        $this->SUT = $container->get(Exchange_NYSE::class);
         // $this->doctrine = $container->get('doctrine');
     }
 

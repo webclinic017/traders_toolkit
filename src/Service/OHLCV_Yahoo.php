@@ -8,7 +8,12 @@
  * file that was distributed with this source code.
  */
 
+namespace App\Service;
+
 class OHLCV_Yahoo implements PriceProviderInterface
 {
-
+	public function downloadHistory($instrument, $fromDate, $toDate, $options)
+	{
+		
+	}
 }
