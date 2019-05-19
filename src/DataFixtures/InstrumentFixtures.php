@@ -10,9 +10,10 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use App\Entity\Instrument;
 // use Symfony\Component\Console\Style\SymfonyStyle;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
 
-class InstrumentFixtures extends Fixture
+class InstrumentFixtures extends Fixture implements FixtureGroupInterface
 {
     /**
      * List of current company listings can be downloaded from NASDAQ website:
@@ -23,6 +24,11 @@ class InstrumentFixtures extends Fixture
     const NASDAQ_SYMBOLS = 'data/source/nasdaq_companylist.csv';
     const AMEX_SYMBOLS = 'data/source/amex_companylist.csv';
 
+
+    public static function getGroups(): array
+    {
+        return ['Instruments'];
+    }
 
     public function load(ObjectManager $manager)
     {

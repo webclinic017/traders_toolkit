@@ -10,15 +10,21 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 // use Symfony\Component\Console\Helper\FormatterHelper;
 use App\Entity\OHLCVHistory;
 use Symfony\Component\Finder\Finder;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
 
-class OHLCVFixtures extends Fixture
+class OHLCVFixtures_AE extends Fixture implements FixtureGroupInterface
 {
 	const DIRECTORY = 'data/source/ohlcv';
     const SUFFIX_DAILY = '_d';
     const SUFFIX_WEEKLY = '_w';
 
     private $manager;
+
+    public static function getGroups(): array
+    {
+        return ['OHLCV'];
+    }
 
     public function load(ObjectManager $manager)
     {
@@ -27,11 +33,10 @@ class OHLCVFixtures extends Fixture
         $output->getFormatter()->setStyle('info-init', new OutputFormatterStyle('white', 'blue'));
         $output->getFormatter()->setStyle('info-end', new OutputFormatterStyle('green', 'blue'));
         // $formatter = new FormatterHelper();
+        $output->writeln(sprintf('<info-init>Will import OHLCV daily and weekly price history from directory %s </>', self::DIRECTORY));
 
         $output->writeln('This seeder will read csv files stored in the ohlcv directory and if their symbol is already present in');
         $output->writeln('database instruments table (has been imported by the InstrumentFixtures seeder) will import the price history.');
-
-        $output->writeln(sprintf('<info-init>Will import OHLCV daily and weekly price history from directory %s </>', self::DIRECTORY));
             
         // load daily
         $output->writeln('Looking for daily OHLCV price files...');
@@ -42,6 +47,7 @@ class OHLCVFixtures extends Fixture
         $output->writeln(sprintf('<info-end>Imported %d daily files</>', $importedFiles));
 
         // load weekly
+        $output->writeln('Looking for weekly OHLCV price files...');
         $suffix = self::SUFFIX_WEEKLY.'.csv';
 
         $importedFiles = $this->importFiles($suffix, $output);
@@ -61,9 +67,18 @@ class OHLCVFixtures extends Fixture
         $repository = $this->manager->getRepository(\App\Entity\Instrument::class);
         // Build filemap by mask
         $finder = new Finder();
-        $finder->in(self::DIRECTORY)->files()->name('*'.$suffix);
+        // debug: will display how many files of each letter found 
+        // foreach ($this->getLetter() as $letter) {
+        //     $finder = new Finder();
+        //     $pattern = sprintf('/^[%s][A-Z]*%s/', $letter, $suffix); 
+        //     // var_dump($pattern); exit();
+        //     $count = $finder->in(self::DIRECTORY)->files()->name($pattern)->sortByName()->count();
+        //     $output->writeln(sprintf('%s: %d', $letter, $count));
+        // }
+        // exit();
+        $finder->in(self::DIRECTORY)->files()->name('/^[A-E][A-Z]*'.$suffix.'/')->sortByName();
         $fileCount = $finder->count();
-        $output->writeln(sprintf('Found %d files', $fileCount));
+        $output->writeln(sprintf('Found %d files for letters A-E ending in %s', $fileCount, $suffix));
 
         $importedFiles = 0;
         // foreach file select the symbol
@@ -113,7 +128,7 @@ class OHLCVFixtures extends Fixture
 
     /**
     * Generator
-    * Skippes first line as header
+    * Skips first line as header
     * https://www.php.net/manual/en/language.generators.overview.php
     */
     private function getLines($file) {
@@ -131,4 +146,17 @@ class OHLCVFixtures extends Fixture
 
         return $counter-1;
 	}
+
+
+    /**
+     * Alphabet generator
+     */
+    private function getLetter()
+    {
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for ($pos = 0; $pos <= 25; $pos++) {
+            yield substr($alphabet, $pos, 1);
+        }
+    }
+    
 }
