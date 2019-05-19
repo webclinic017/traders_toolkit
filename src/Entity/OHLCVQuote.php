@@ -74,7 +74,7 @@ class OHLCVQuote
 
     public function setOpen(?float $open): self
     {
-        $this->open = $open;
+        $this->open = round($open, 2);
 
         return $this;
     }
@@ -86,7 +86,7 @@ class OHLCVQuote
 
     public function setHigh(?float $high): self
     {
-        $this->high = $high;
+        $this->high = round($high, 2);
 
         return $this;
     }
@@ -98,7 +98,7 @@ class OHLCVQuote
 
     public function setLow(float $low): self
     {
-        $this->low = $low;
+        $this->low = round($low, 2);
 
         return $this;
     }
@@ -110,7 +110,7 @@ class OHLCVQuote
 
     public function setClose(?float $close): self
     {
-        $this->close = $close;
+        $this->close = round($close, 2);
 
         return $this;
     }
