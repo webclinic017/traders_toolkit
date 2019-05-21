@@ -42,4 +42,12 @@ interface ExchangeInterface
 	 */
 	public function isTraded($symbol, $exchange);
 
+	/**
+	 * Iterates back one day until finds a trading day
+	 * @param \DateTime $date
+	 * @throws Exception if max number of iterations reached without finding a trading day
+	 * @return \DateTime previous T from $date
+	 */
+	public function calcPreviousTradingDay($date);
+
 }

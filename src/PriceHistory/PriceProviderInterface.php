@@ -16,8 +16,11 @@ namespace App\PriceHistory;
 interface PriceProviderInterface
 {
 	/**
-	 * Downloads historical price information from a provider
-	 * @param App\Entity\Instrument
+	 * Downloads historical price information from a provider. Historical means prices
+	 * from a given date and including last trading day before today. If today is a
+	 * trading day, it will not be included. Use downloadQuote (for open trading hours),
+	 * and downloadClosingPrice(for past trading hours).
+	 * @param App\Entity\Instrument $instrument
 	 * @param DateTime $fromDate
 	 * @param DateTime $toDate
 	 * @param array $options (example: ['interval' => 'P1D'])
@@ -33,7 +36,9 @@ interface PriceProviderInterface
  
  	/**
  	 * Quotes are downloaded when a market is open
- 	 */
+ 	 * @param App\Entity\Instrument $instrument
+ 	 * @return App\Entity\Quote when market is open or null if market is closed.
+  	 */
  	public function downloadQuote($instrument);
  
  	public function saveQuote($quote);
@@ -43,10 +48,11 @@ interface PriceProviderInterface
 	public function retrieveQuote($instrument);
 
 	/**
-	 * Closing prices are downloaded when market is closed
-	 * They are different from history as Closing Price is 
-	 *   only for one day.
+	 * Closing Prices are downloaded when market is closed and will return values
+	 * for the closing price on last known trading day.
+	 * @param App\Entity\Instrument $instrument
+	 * @return App\Entity\History when market is closed or null if market is open.
 	 */
-	public function downloadClosingPrice($instrument, $date);
+	public function downloadClosingPrice($instrument);
 
 }

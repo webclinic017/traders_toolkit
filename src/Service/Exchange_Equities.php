@@ -113,4 +113,19 @@ class Exchange_Equities implements ExchangeInterface
 		// remove veteransDay
 		$this->holidaysProvider->removeHoliday('veteransDay');
 	}
+
+	public function calcPreviousTradingDay($date)
+	{
+		$interval = new \DateInterval('P1D');
+		$prevT = clone $date;
+		$counter = 0;
+		do {
+			$prevT->sub($interval);
+			$counter++;
+		} while (!$this->isTradingDay($prevT) && $counter < 10);
+
+		if (9 == $counter) throw new Exception('Too many iterations while looking for previous T.');
+
+		return $prevT;
+	}
 }

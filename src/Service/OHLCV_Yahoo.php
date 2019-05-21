@@ -15,6 +15,7 @@ use Scheb\YahooFinanceApi\ApiClient;
 use Scheb\YahooFinanceApi\ApiClientFactory;
 use Scheb\YahooFinanceApi\Exception\ApiException;
 use App\Entity\OHLCVHistory;
+use App\Service\Exchange_Equities;
 
 
 class OHLCV_Yahoo implements PriceProviderInterface
@@ -44,10 +45,13 @@ class OHLCV_Yahoo implements PriceProviderInterface
 
 	private $saveQuotePath;
 
+	private $exchangeEquities;
 
-	public function __construct()
+
+	public function __construct(Exchange_Equities $exchangeEquities)
 	{
 		$this->priceProvider = ApiClientFactory::createApiClient();
+		$this->exchangeEquities = $exchangeEquities;
 	}
 
 
@@ -56,6 +60,17 @@ class OHLCV_Yahoo implements PriceProviderInterface
 	 */
 	public function downloadHistory($instrument, $fromDate, $toDate, $options)
 	{
+		if ('test' == $_SERVER['APP_ENV']) {
+			$today = $_SERVER['TODAY'];
+		} else {
+			$today = date('Y-m-d');
+		}
+		// var_dump($today); exit();
+		// see if $toDate is today
+		if ($toDate->format('Y-m-d') == $today) {
+			$toDate = $this->exchangeEquities->calcPreviousTradingDay($toDate);
+		}
+
 		if (isset($options['interval']) && in_array($options['interval'], $this->intervals)) {
 			switch ($options['interval']) {
 				case 'P1M':
@@ -76,9 +91,9 @@ class OHLCV_Yahoo implements PriceProviderInterface
 		}
 
 		try {
-			$result = $this->priceProvider->getHistoricalData($instrument->getSymbol(), $apiInterval, $startDate, $endDate);
+			$result = $this->priceProvider->getHistoricalData($instrument->getSymbol(), $apiInterval, $fromDate, $toDate);
 			// var_dump($result);
-			array_walk($result, function(&$v) {
+			array_walk($result, function(&$v, $k, $data) {
 				$OHLCVHistory = new OHLCVHistory();
 				$OHLCVHistory->setOpen($v->getOpen());
 				$OHLCVHistory->setHigh($v->getHigh());
@@ -86,10 +101,10 @@ class OHLCV_Yahoo implements PriceProviderInterface
 				$OHLCVHistory->setClose($v->getClose());
 				$OHLCVHistory->setVolume($v->getVolume());
 				$OHLCVHistory->setTimestamp($v->getDate());
-				$OHLCVHistory->setInstrument($instrument);
-				$OHLCVHistory->setTimeinterval($interval);
+				$OHLCVHistory->setInstrument($data[0]);
+				$OHLCVHistory->setTimeinterval($data[1]);
 				$v = $OHLCVHistory;
-			});
+			}, [$instrument, $interval]);
 
 			return $result;
 
@@ -112,5 +127,5 @@ class OHLCV_Yahoo implements PriceProviderInterface
  
 	public function retrieveQuote($instrument) {}
 
-	public function downloadClosingPrice($instrument, $date) {}
+	public function downloadClosingPrice($instrument) {}
 }
