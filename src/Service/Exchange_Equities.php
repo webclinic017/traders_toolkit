@@ -8,10 +8,8 @@ use App\PriceHistory\ExchangeInterface;
 use App\Repository\InstrumentRepository;
 
 
-class Exchange_NYSE implements ExchangeInterface
+class Exchange_Equities implements ExchangeInterface
 {
-	const EXCHANGE = 'NYSE';
-	
 	/**
 	 * @var Yasumi holidays object
 	 */
@@ -95,14 +93,14 @@ class Exchange_NYSE implements ExchangeInterface
 
 	}
 
-	public function getTradedInstruments()
+	public function getTradedInstruments($exchange)
 	{
-		return ($this->instrumentRepository->findBy(['exchange' => self::EXCHANGE]));
+		return ($this->instrumentRepository->findBy(['exchange' => $exchange]));
 	}
 
-	public function isTraded($symbol) 
+	public function isTraded($symbol, $exchange) 
 	{
-		return ($this->instrumentRepository->findOneBy(['symbol' => $symbol, 'exchange' => self::EXCHANGE]))? true : false;
+		return ($this->instrumentRepository->findOneBy(['symbol' => $symbol, 'exchange' => $exchange]))? true : false;
 	}
 
 	private function matchHolidays($year)

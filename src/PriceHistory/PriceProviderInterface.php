@@ -8,16 +8,26 @@
  * file that was distributed with this source code.
  */
 
+namespace App\PriceHistory;
+
 /**
  * Price provider can be any style of price data: OHLCV, ticks, japanese hoopla, etc.
  */
 interface PriceProviderInterface
 {
+	/**
+	 * Downloads historical price information from a provider
+	 * @param App\Entity\Instrument
+	 * @param DateTime $fromDate
+	 * @param DateTime $toDate
+	 * @param array $options (example: ['interval' => 'P1D'])
+	 * @return array with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
+	 */
 	public function downloadHistory($instrument, $fromDate, $toDate, $options);
 
- 	public function saveHistory($history);
+ 	public function addHistory($instrument, $history);
  
- 	public function mergeHistory($instrument, $history);
+ 	public function exportHistory($history, $path);
  
  	public function retrieveHistory($instrument, $fromDate, $toDate);
  

@@ -29,15 +29,17 @@ interface ExchangeInterface
 
 	/**
 	 * Queries Instruments table for which Exchange they belong to
+	 * @param string $exchange name ('NYSE|NASDAQ|AMEX')
 	 * @return array of Instrument Entities
 	 */
-	public function getTradedInstruments();
+	public function getTradedInstruments($exchange);
 
 	/**
 	 * Looks up given symbol
 	 * @param string $symbol
+	 * @param string $exchange
 	 * @return bool
 	 */
-	public function isTraded($symbol);
+	public function isTraded($symbol, $exchange);
 
 }

@@ -29,8 +29,8 @@ services:
     #     resource: '../src/Service/YasumiHolidays.php'
     #     autowire: true
     #     public: true
-    App\Service\Exchange_NYSE:
+    App\Service\Exchange_Equities:
         public: true
-        # autowire: true
-        # resource: '../src/Service/Exchange_NYSE.php'
+    App\Service\OHLCV_Yahoo:
+        public: true
         

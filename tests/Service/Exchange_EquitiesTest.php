@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Tests\PriceHistory;
+namespace App\Tests\Service;
 
 // use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use App\Service\Exchange_NYSE;
+use App\Service\Exchange_Equities;
 // use App\Repository\InstrumentRepository;
 // use App\Service\Holidays;
 // use App\Service\Yasumi;
 // use Yasumi\Yasumi;
 
-class Exchange_NYSETest extends KernelTestCase
+class Exchange_EquitiesTest extends KernelTestCase
 {
     private $SUT;
 
@@ -29,13 +29,13 @@ class Exchange_NYSETest extends KernelTestCase
         // var_dump($container->has('test.service_container')); exit();
 
         // $this->SUT = $container->get('app.exchange.nyse');
-        $this->SUT = $container->get(Exchange_NYSE::class);
+        $this->SUT = $container->get(Exchange_Equities::class);
         // $this->doctrine = $container->get('doctrine');
     }
 
     public function testIntro()
     {
-    	fwrite(STDOUT, 'Test');
+    	fwrite(STDOUT, 'Testing Exchange_Equities');
     	$this->assertTrue(true);
     }
 
@@ -252,9 +252,9 @@ class Exchange_NYSETest extends KernelTestCase
      */
     public function test30()
     {
-        $this->assertTrue($this->SUT->isTraded('MCD'));
+        $this->assertTrue($this->SUT->isTraded('MCD', 'NYSE'));
 
-        $this->assertFalse($this->SUT->isTraded('SPY1'));
+        $this->assertFalse($this->SUT->isTraded('SPY1', 'NYSE'));
     }
 
     /**
@@ -262,12 +262,20 @@ class Exchange_NYSETest extends KernelTestCase
      */
     public function test40()
     {
-        $result = $this->SUT->getTradedInstruments();
+        $result = $this->SUT->getTradedInstruments('NYSE');
         $nyse = file_get_contents('data/source/nyse_companylist.csv');
         // var_dump($nyse); exit();
         foreach ($result as $instrument) {
             $needle = sprintf('"%s"', $instrument->getSymbol());
             $this->assertTrue(false != strpos($nyse, $needle), sprintf( 'symbol=%s was not found in list of NYSE symbols.', $instrument->getSymbol() ) );
+        }
+
+        $result = $this->SUT->getTradedInstruments('NASDAQ');
+        $nyse = file_get_contents('data/source/nasdaq_companylist.csv');
+        // var_dump($nyse); exit();
+        foreach ($result as $instrument) {
+            $needle = sprintf('"%s"', $instrument->getSymbol());
+            $this->assertTrue(false != strpos($nyse, $needle), sprintf( 'symbol=%s was not found in list of NASDAQ symbols.', $instrument->getSymbol() ) );
         }
 
     }
