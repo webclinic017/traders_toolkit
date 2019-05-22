@@ -24,6 +24,7 @@ interface PriceProviderInterface
 	 * @param DateTime $fromDate
 	 * @param DateTime $toDate
 	 * @param array $options (example: ['interval' => 'P1D'])
+	 * @throws PriceHistoryException 
 	 * @return array with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
 	 */
 	public function downloadHistory($instrument, $fromDate, $toDate, $options);

@@ -7,6 +7,7 @@ use App\Service\OHLCV_Yahoo;
 use Faker\Factory;
 use App\Service\Exchange_Equities;
 use App\Entity\OHLCVHistory;
+use App\Exception\PriceHistoryException;
 
 class OHLCV_YahooTest extends KernelTestCase
 {
@@ -185,11 +186,36 @@ class OHLCV_YahooTest extends KernelTestCase
     }
 
 
+    /**
+     * $fromDate = $toDate
+     * will throw PriceHistoryException
+     */
+    public function test80()
+    {
+        $toDate = new \DateTime('2019-05-20');
+        $fromDate = new \DateTime('2019-05-20');
+        $options = ['interval' => 'P1D'];
 
-    // Decide on these outcomes:
+        $this->expectException(PriceHistoryException::class);
 
-    // see if $fromDate = $toDate, both are today
-    // ??
+        $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
+    }
+    
+
+    /**
+     * When $fromDate is a Saturday, $toDate is a Sunday Yahoo API will return error
+     * My code supposed to return PriceHistoryException
+     */
+    public function test90()
+    {
+        // $toDate = new \DateTime('2019-05-19');
+        // $fromDate = new \DateTime('2019-05-18');
+        // $options = ['interval' => 'P1D'];
+
+        // $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
+
+        // var_dump($history); 
+    }
 
     // see if $fromDate = $toDate, both are in the past
     // downloads one record for $toDate?? What if it's not a trading day?

@@ -13,9 +13,10 @@ namespace App\Service;
 use App\PriceHistory\PriceProviderInterface;
 use Scheb\YahooFinanceApi\ApiClient;
 use Scheb\YahooFinanceApi\ApiClientFactory;
-use Scheb\YahooFinanceApi\Exception\ApiException;
+// use Scheb\YahooFinanceApi\Exception\ApiException;
 use App\Entity\OHLCVHistory;
 use App\Service\Exchange_Equities;
+use App\Exception\PriceHistoryException;
 
 
 class OHLCV_Yahoo implements PriceProviderInterface
@@ -71,7 +72,20 @@ class OHLCV_Yahoo implements PriceProviderInterface
 			$toDate = $this->exchangeEquities->calcPreviousTradingDay($toDate);
 		} elseif ($toDate->format('U') > strtotime($today)) {
 			$toDate = $this->exchangeEquities->calcPreviousTradingDay(new \DateTime($today));
+		} 
+		// test for exceptions:
+		if ($toDate->format('Y-m-d') == $fromDate->format('Y-m-d')) {
+			throw new PriceHistoryException(sprintf('$fromDate %s is equal to $toDate %s', $fromDate->format('Y-m-d'), $toDate->format('Y-m-d')));
 		}
+		if ($toDate->format('U') < $fromDate->format('U')) {
+			throw new PriceHistoryException(sprintf('$toDate %s is earlier than $fromDate %s', $toDate->format('Y-m-d'), $fromDate->format('Y-m-d')));	
+		}
+		$hours = $toDate->diff($fromDate)->format('h'); // Hours, numeric
+		// check if $toDate and $fromDate are on the same weekend, then except if ()
+
+		// check if $toDate or $fromDate is a long weekend (includes a contiguous holiday, then except
+
+
 
 		if (isset($options['interval']) && in_array($options['interval'], $this->intervals)) {
 			switch ($options['interval']) {
@@ -92,27 +106,23 @@ class OHLCV_Yahoo implements PriceProviderInterface
 			$apiInterval = ApiClient::INTERVAL_1_DAY;
 		}
 
-		try {
-			$result = $this->priceProvider->getHistoricalData($instrument->getSymbol(), $apiInterval, $fromDate, $toDate);
-			// var_dump($result);
-			array_walk($result, function(&$v, $k, $data) {
-				$OHLCVHistory = new OHLCVHistory();
-				$OHLCVHistory->setOpen($v->getOpen());
-				$OHLCVHistory->setHigh($v->getHigh());
-				$OHLCVHistory->setLow($v->getLow());
-				$OHLCVHistory->setClose($v->getClose());
-				$OHLCVHistory->setVolume($v->getVolume());
-				$OHLCVHistory->setTimestamp($v->getDate());
-				$OHLCVHistory->setInstrument($data[0]);
-				$OHLCVHistory->setTimeinterval($data[1]);
-				$v = $OHLCVHistory;
-			}, [$instrument, $interval]);
+		$result = $this->priceProvider->getHistoricalData($instrument->getSymbol(), $apiInterval, $fromDate, $toDate);
+		// var_dump($result);
+		array_walk($result, function(&$v, $k, $data) {
+			$OHLCVHistory = new OHLCVHistory();
+			$OHLCVHistory->setOpen($v->getOpen());
+			$OHLCVHistory->setHigh($v->getHigh());
+			$OHLCVHistory->setLow($v->getLow());
+			$OHLCVHistory->setClose($v->getClose());
+			$OHLCVHistory->setVolume($v->getVolume());
+			$OHLCVHistory->setTimestamp($v->getDate());
+			$OHLCVHistory->setInstrument($data[0]);
+			$OHLCVHistory->setTimeinterval($data[1]);
+			$v = $OHLCVHistory;
+		}, [$instrument, $interval]);
 
-			return $result;
+		return $result;
 
-		} catch (ApiException $e) {
-			// Log error
-		}
 	}
 
 	public function addHistory($instrument, $history) {}
