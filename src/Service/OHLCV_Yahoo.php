@@ -60,7 +60,7 @@ class OHLCV_Yahoo implements PriceProviderInterface
 	 */
 	public function downloadHistory($instrument, $fromDate, $toDate, $options)
 	{
-		if ('test' == $_SERVER['APP_ENV']) {
+		if ('test' == $_SERVER['APP_ENV'] && isset($_SERVER['TODAY'])) {
 			$today = $_SERVER['TODAY'];
 		} else {
 			$today = date('Y-m-d');
@@ -69,6 +69,8 @@ class OHLCV_Yahoo implements PriceProviderInterface
 		// see if $toDate is today
 		if ($toDate->format('Y-m-d') == $today) {
 			$toDate = $this->exchangeEquities->calcPreviousTradingDay($toDate);
+		} elseif ($toDate->format('U') > strtotime($today)) {
+			$toDate = $this->exchangeEquities->calcPreviousTradingDay(new \DateTime($today));
 		}
 
 		if (isset($options['interval']) && in_array($options['interval'], $this->intervals)) {

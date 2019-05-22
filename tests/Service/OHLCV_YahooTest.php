@@ -75,46 +75,127 @@ class OHLCV_YahooTest extends KernelTestCase
     {
         $_SERVER['TODAY'] = '2019-05-20'; // Monday, May 20, 2019 is a T
         $toDate = new \DateTime($_SERVER['TODAY']);
-        $fromDate = new \DateTime('1 week ago');
+        $fromDate = clone $toDate;
+        $fromDate->sub(new \DateInterval('P1W'));
         $options = ['interval' => 'P1D'];
 
         $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
 
-        $latestItem = array_pop($history);
+        $latestItem = array_pop($history);  // pop element off the end (last element) of array
         // var_dump($latestItem); exit();
         $this->assertSame('2019-05-17', $latestItem->getTimestamp()->format('Y-m-d'));
     }
 
+    /**
+     * today is not a trading day, $toDate is set for today, 
+     * check if downloads history with the last date as last T from today
+     */
+    public function test30()
+    {
+        $_SERVER['TODAY'] = '2019-05-19'; // Sunday, May 19, 2019
+        $toDate = new \DateTime($_SERVER['TODAY']);
+        $fromDate = clone $toDate;
+        $fromDate->sub(new \DateInterval('P1W'));
+        $options = ['interval' => 'P1D'];
 
-        // today is not a trading day, $toDate is set for today, 
-        // check if downloads history with the last date as last T from today
+        $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
 
-        // $toDate is set for some day in the past, and it is a T
-        // check that history downloads including $toDate
+        $latestItem = array_pop($history);  // pop element off the end (last element) of array
+        // var_dump($latestItem); exit();
+        $this->assertSame('2019-05-17', $latestItem->getTimestamp()->format('Y-m-d'));        
+    }
 
-        // $toDate is set for some date in the past, and it is not a T
-        // check that history downloads including $toDate
+    /**
+     * $toDate is set for some day in the past, and it is a T
+     *  check that history downloads including $toDate
+     */
+    public function test40()
+    {
+        $toDate = new \DateTime('2019-05-15'); // Wednesday, May 15, 2019
+        $fromDate = clone $toDate;
+        $fromDate->sub(new \DateInterval('P1W'));
+        $options = ['interval' => 'P1D'];
 
-        // $toDate is set for future, check that if:
-        // today is a trading day
-        // check if downloads history with the last date as last T from today
+        $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
 
-        // $toDate is set for future, check that if:
-        // today is not a trading day
-        // check if downloads history with the last date as last T from today
+        $latestItem = array_pop($history);  // pop element off the end (last element) of array
+        // var_dump($latestItem); exit();
+        $this->assertSame('2019-05-15', $latestItem->getTimestamp()->format('Y-m-d'));
+    }    
+
+    /**
+     * $toDate is set for some date in the past, and it is not a T
+     * check that history downloads including up to $toDate
+     */
+    public function test50()
+    {
+        $toDate = new \DateTime('2019-04-19'); // Friday, April 19, 2019 Good Friday
+        $fromDate = clone $toDate;
+        $fromDate->sub(new \DateInterval('P1W'));
+        $options = ['interval' => 'P1D'];
+
+        $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
+
+        $latestItem = array_pop($history);  // pop element off the end (last element) of array
+        // var_dump($latestItem); exit();
+        $this->assertSame('2019-04-18', $latestItem->getTimestamp()->format('Y-m-d'));
+    }    
+
+    /**
+     * $toDate is set for future
+     * today is a trading day
+     * check if downloads history with the last date as last T from today
+     */
+    public function test60()
+    {
+        $toDate = new \DateTime('2019-05-20');
+        $toDate->add(new \DateInterval('P1W'));
+        $_SERVER['TODAY'] = '2019-05-20'; // Monday, May 20, 2019 is a T
+        $fromDate = clone $toDate;
+        $fromDate->sub(new \DateInterval('P2W'));
+        $options = ['interval' => 'P1D'];
+
+        $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
+
+        $latestItem = array_pop($history);  // pop element off the end (last element) of array
+        
+        $this->assertSame('2019-05-17', $latestItem->getTimestamp()->format('Y-m-d'));
+    }    
+
+
+    /**
+     * $toDate is set for future
+     * today is not a trading day
+     * check if downloads history with the last date as last T from today
+     */
+    public function test70 ()
+    {
+        $toDate = new \DateTime('2019-05-20');
+        $toDate->add(new \DateInterval('P1W'));
+        $_SERVER['TODAY'] = '2019-05-19'; // Sunday, May 19, 2019
+        $fromDate = clone $toDate;
+        $fromDate->sub(new \DateInterval('P2W'));
+        $options = ['interval' => 'P1D'];
+
+        $history = $this->SUT->downloadHistory($this->instrument, $fromDate, $toDate, $options);
+
+        $latestItem = array_pop($history);  // pop element off the end (last element) of array
+        
+        $this->assertSame('2019-05-17', $latestItem->getTimestamp()->format('Y-m-d'));    
+    }
 
 
 
-        // Decide on these outcomes:
+    // Decide on these outcomes:
 
-        // see if $fromDate = $toDate, both are today
-        // ??
+    // see if $fromDate = $toDate, both are today
+    // ??
 
-        // see if $fromDate = $toDate, both are in the past
-        // downloads one record for $toDate?? What if it's not a trading day?
+    // see if $fromDate = $toDate, both are in the past
+    // downloads one record for $toDate?? What if it's not a trading day?
 
-        // see if $fromDate = $toDate, both are in the future
-        // returns null, or empty history.??
+    // see if $fromDate = $toDate, both are in the future
+    // returns null, or empty history.??
 
 
     protected function tearDown(): void
