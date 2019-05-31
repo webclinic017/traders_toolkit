@@ -90,7 +90,6 @@ class Exchange_Equities implements ExchangeInterface
 
 		// check for regular trading hours
 		return ($datetime->format('U') % 86400 + $secondsOffsetFromUTC > 9.5*3600 && $datetime->format('U') % 86400 + $secondsOffsetFromUTC < 16*3600 )? true : false;
-
 	}
 
 	public function getTradedInstruments($exchange)

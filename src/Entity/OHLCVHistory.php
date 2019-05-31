@@ -43,7 +43,7 @@ class OHLCVHistory
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVHistories")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $instrument;
 

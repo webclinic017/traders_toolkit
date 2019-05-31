@@ -43,7 +43,7 @@ class OHLCVQuote
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVQuotes")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $instrument;
 

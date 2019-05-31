@@ -20,6 +20,8 @@ interface PriceProviderInterface
 	 * from a given date and including last trading day before today. If today is a
 	 * trading day, it will not be included. Use downloadQuote (for open trading hours),
 	 * and downloadClosingPrice(for past trading hours).
+	 * Downloaded history must be sorted from earliest date (the first element) to the
+	 *  latest (the last element).
 	 * @param App\Entity\Instrument $instrument
 	 * @param DateTime $fromDate
 	 * @param DateTime $toDate
@@ -29,11 +31,26 @@ interface PriceProviderInterface
 	 */
 	public function downloadHistory($instrument, $fromDate, $toDate, $options);
 
+	/**
+	 * Will add new history to the stored history.
+	 * All records in old history which start from the earliest date in $history will be deleted, with the new
+	 *  records from $history written in.
+	 * @param App\Entity\Instrument $instrument
+	 * @param array $history with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
+	 */
  	public function addHistory($instrument, $history);
  
- 	public function exportHistory($history, $path);
+ 	public function exportHistory($history, $path, $options);
  
- 	public function retrieveHistory($instrument, $fromDate, $toDate);
+ 	/**
+ 	 * Retrieves price history for an instrument from a storage
+ 	 * @param App\Entity\Instrument $instrument
+ 	 * @param DateTime $fromDate
+ 	 * @param DateTime $toDate
+ 	 * @param array $options (example: ['interval' => 'P1D'])
+ 	 * @return array with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
+ 	 */
+ 	public function retrieveHistory($instrument, $fromDate, $toDate, $options);
  
  	/**
  	 * Quotes are downloaded when a market is open
@@ -42,10 +59,20 @@ interface PriceProviderInterface
   	 */
  	public function downloadQuote($instrument);
  
+ 	/**
+ 	 * Saves given quote in storage. For any given instrument, only one quote supposed to be saved in storage.
+ 	 * If this function is called with existing quote already in storage, existing quote will be reomoved, and
+ 	 * new one saved.
+ 	 * @param App\Entity\OHLCVQuote
+ 	 */
  	public function saveQuote($quote);
  
  	public function addQuoteToHistory($quote, $history);
  
+ 	/**
+ 	 * Retrieves quote from storage. Only one quote per instrument is supposed to be in storage. See saveQuote above
+ 	 * App\Entity\Instrument $instrument
+ 	 */
 	public function retrieveQuote($instrument);
 
 	/**

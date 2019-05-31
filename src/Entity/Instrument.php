@@ -129,35 +129,38 @@ class Instrument
     }
 
     /**
+     * These were replaced by calls to OHLCV repositories within appropriate functions.
+     */
+    /**
      * @return Collection|OHLCVQuote[]
      */
-    public function getOHLCVQuotes(): Collection
-    {
-        return $this->oHLCVQuotes;
-    }
+    // public function getOHLCVQuotes(): Collection
+    // {
+    //     return $this->oHLCVQuotes;
+    // }
 
-    public function addOHLCVQuote(OHLCVQuote $oHLCVQuote): self
-    {
-        if (!$this->oHLCVQuotes->contains($oHLCVQuote)) {
-            $this->oHLCVQuotes[] = $oHLCVQuote;
-            $oHLCVQuote->setSymbol($this);
-        }
+    // public function addOHLCVQuote(OHLCVQuote $oHLCVQuote): self
+    // {
+    //     if (!$this->oHLCVQuotes->contains($oHLCVQuote)) {
+    //         $this->oHLCVQuotes[] = $oHLCVQuote;
+    //         $oHLCVQuote->setSymbol($this);
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    public function removeOHLCVQuote(OHLCVQuote $oHLCVQuote): self
-    {
-        if ($this->oHLCVQuotes->contains($oHLCVQuote)) {
-            $this->oHLCVQuotes->removeElement($oHLCVQuote);
-            // set the owning side to null (unless already changed)
-            if ($oHLCVQuote->getSymbol() === $this) {
-                $oHLCVQuote->setSymbol(null);
-            }
-        }
+    // public function removeOHLCVQuote(OHLCVQuote $oHLCVQuote): self
+    // {
+    //     if ($this->oHLCVQuotes->contains($oHLCVQuote)) {
+    //         $this->oHLCVQuotes->removeElement($oHLCVQuote);
+    //         // set the owning side to null (unless already changed)
+    //         if ($oHLCVQuote->getSymbol() === $this) {
+    //             $oHLCVQuote->setSymbol(null);
+    //         }
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getExchange(): ?string
     {
