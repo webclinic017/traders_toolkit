@@ -1,4 +1,12 @@
 <?php
+/**
+ * A note on relations between instrument, OHLCVHistory and OHLCVQuote:
+ *  OHLCVHistory is supposed to have a lot of data. Having it as a collection
+ *  property on instrument is going to affect performance. Having collections
+ *  has its benefits in ease of access. Therefore, only OHLCVQuotes are 
+ *  accessible via collection prop on instruments, because only one quote 
+ *  per instrument is supposed to be stored.
+ */
 
 namespace App\Entity;
 
@@ -35,19 +43,19 @@ class Instrument
     private $description;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVHistory", mappedBy="instrument", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVHistory", mappedBy="instrument", orphanRemoval=true, cascade={"detach"})
      */
     private $oHLCVHistories;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\OHLCVQuote", mappedBy="instrument", orphanRemoval=true)
-     */
-    private $oHLCVQuotes;
 
     /**
      * @ORM\Column(type="string", length=80, nullable=true)
      */
     private $exchange;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\OHLCVQuote", mappedBy="instrument", cascade={"persist", "remove", "refresh"})
+     */
+    private $oHLCVQuote;
 
     public function __construct()
     {
@@ -128,40 +136,6 @@ class Instrument
         return $this;
     }
 
-    /**
-     * These were replaced by calls to OHLCV repositories within appropriate functions.
-     */
-    /**
-     * @return Collection|OHLCVQuote[]
-     */
-    // public function getOHLCVQuotes(): Collection
-    // {
-    //     return $this->oHLCVQuotes;
-    // }
-
-    // public function addOHLCVQuote(OHLCVQuote $oHLCVQuote): self
-    // {
-    //     if (!$this->oHLCVQuotes->contains($oHLCVQuote)) {
-    //         $this->oHLCVQuotes[] = $oHLCVQuote;
-    //         $oHLCVQuote->setSymbol($this);
-    //     }
-
-    //     return $this;
-    // }
-
-    // public function removeOHLCVQuote(OHLCVQuote $oHLCVQuote): self
-    // {
-    //     if ($this->oHLCVQuotes->contains($oHLCVQuote)) {
-    //         $this->oHLCVQuotes->removeElement($oHLCVQuote);
-    //         // set the owning side to null (unless already changed)
-    //         if ($oHLCVQuote->getSymbol() === $this) {
-    //             $oHLCVQuote->setSymbol(null);
-    //         }
-    //     }
-
-    //     return $this;
-    // }
-
     public function getExchange(): ?string
     {
         return $this->exchange;
@@ -170,6 +144,23 @@ class Instrument
     public function setExchange(?string $exchange): self
     {
         $this->exchange = $exchange;
+
+        return $this;
+    }
+
+    public function getOHLCVQuote(): ?OHLCVQuote
+    {
+        return $this->oHLCVQuote;
+    }
+
+    public function setOHLCVQuote(OHLCVQuote $oHLCVQuote): self
+    {
+        $this->oHLCVQuote = $oHLCVQuote;
+
+        // set the owning side of the relation if necessary
+        if ($this !== $oHLCVQuote->getInstrument()) {
+            $oHLCVQuote->setInstrument($this);
+        }
 
         return $this;
     }

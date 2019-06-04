@@ -40,13 +40,14 @@ class OHLCV_YahooTest extends KernelTestCase
 
         $this->equities = $container->get(Exchange_Equities::class);
 
+        $this->em = $container->get('doctrine')->getManager();
+
         $exchanges = ['NYSE', 'NASDAQ'];
         $exchange = $this->faker->randomElement($exchanges);
         
         $instruments = $this->equities->getTradedInstruments($exchange);
-        $this->instrument = $this->faker->randomElement($instruments);
-
-        $this->em = $container->get('doctrine')->getManager();
+        // $this->instrument = $this->faker->randomElement($instruments);
+        $this->instrument = $this->em->getRepository(Instrument::class)->findOneBy(['symbol' => 'BKS']);
     }
 
     public function testIntro()
@@ -54,6 +55,18 @@ class OHLCV_YahooTest extends KernelTestCase
     	fwrite(STDOUT, 'Testing OHLCV_Yahoo');
     	$this->assertTrue(true);
     }
+
+    /**
+     * Test relation between entities
+     */
+    public function test5()
+    {
+        fwrite(STDOUT, $this->instrument->getSymbol());
+
+        $history = $this->instrument->getOHLCVHistories();
+
+        $this->assertGreaterThan(900, count($history));
+    }    
 
     /**
      * test downloadHistory:
@@ -141,6 +154,7 @@ class OHLCV_YahooTest extends KernelTestCase
      */
     public function test50()
     {
+        $this->markTestSkipped();
         $toDate = new \DateTime('2019-04-19'); // Friday, April 19, 2019 Good Friday
         $fromDate = clone $toDate;
         $fromDate->sub(new \DateInterval('P1W'));
@@ -294,6 +308,7 @@ class OHLCV_YahooTest extends KernelTestCase
 
         // rollback db storage
         // $this->em->getConnection()->rollBack();
+        exit();
     }
 
     /**
@@ -348,6 +363,7 @@ class OHLCV_YahooTest extends KernelTestCase
      */
     public function test130()
     {
+        // fwrite(STDOUT, $this->instrument->getSymbol());
         // store 5 records for a week
         $startDate = new \DateTime('2018-05-14'); // Monday
         $endDate = clone $startDate; // this one will be changed inside createMockHistory, and when done will have $endDate
@@ -384,6 +400,7 @@ class OHLCV_YahooTest extends KernelTestCase
         for ($i = 0; $i <= 4; $i++) {
             $this->assertEquals($this->computeControlSum($result[$i]), $this->computeControlSum($history[$i]));
         }
+        // exit();
     }
 
     /**
@@ -412,83 +429,128 @@ class OHLCV_YahooTest extends KernelTestCase
     public function test150()
     {
         $_SERVER['TODAY'] = '2019-05-20 09:30:01'; // Monday, May 20, 2019
-        $date = new \DateTime($_SERVER['TODAY']);
-        $interval = new \DateInterval('P1D');
-        $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
-        // Quote is not already saved. 
-        // New quote gets saved in in storage
-        $newQuote = $this->SUT->downloadQuote($this->instrument);
-        $this->SUT->saveQuote($newQuote);
-
-        $results = $OHLCVQuoteRepository->findBy(['instrument' => $this->instrument]);
-
-        $this->assertCount(1, $results);
-
-        $this->assertSame($newQuote->getTimestamp()->format('Y-m-d'), $results[0]->getTimestamp()->format('Y-m-d'));
-
-        $this->em->remove($newQuote);
-        $this->em->flush();
+        // $date = new \DateTime($_SERVER['TODAY']);
+        // $interval = new \DateInterval('P1D');
+        $period = 'P1D';
+        // $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
 
         // Quote is already saved.  Only one quote supposed to remain in storage. Existing quote must be removed, and new one returned.
-        // Simulate saving of existing quote
-        $quote = new OHLCVQuote();
-        $quote->setInstrument($this->instrument);
-        $quote->setProvider($this->SUT::PROVIDER_NAME);
-        $quote->setTimestamp($date);
-        $quote->setTimeinterval($interval);
-        $quote->setOpen(rand(100,10000)/100);
-        $quote->setHigh(rand(100,10000)/100);
-        $quote->setLow(rand(100,10000)/100);
-        $quote->setClose(rand(100,10000)/100);
-        $quote->setVolume(rand(100,10000));
+        // $quote = new OHLCVQuote();
+        // $quote->setInstrument($this->instrument);
+        // $quote->setProvider($this->SUT::PROVIDER_NAME);
+        // $quote->setTimestamp($date);
+        // $quote->setTimeinterval($interval);
+        // $quote->setOpen(rand(100,1000));
+        // $quote->setHigh(rand(100,1000));
+        // $quote->setLow(rand(100,1000));
+        // $quote->setClose(rand(100,1000));
+        // $quote->setVolume(rand(100,1000));
+        $data = [
+            'timestamp' => $_SERVER['TODAY'],
+            'timeinterval' => $period,
+            'open' => rand(100,1000),
+            'high' => rand(100,1000),
+            'low'  => rand(100,1000),
+            'close' => rand(100,1000),
+            'volume' => rand(100,1000),
+        ];
 
-        $this->em->persist($quote);
-        $this->em->flush();
-        $quoteId = $quote->getId();
-        // download actual quote
-        $newQuote = $this->SUT->downloadQuote($this->instrument);
-        $this->SUT->saveQuote($newQuote);
+        $this->SUT->saveQuote($this->instrument->getSymbol(), $data);
 
-        // check that the old one is removed
-        // var_dump($OHLCVQuoteRepository->find($quote->getId()));
-        $this->assertNull($OHLCVQuoteRepository->find($quoteId));
+        // $this->assertTrue(true);
 
-        $results = $OHLCVQuoteRepository->findBy(['instrument' => $this->instrument]);
+        // // Quote is NOT already saved. 
+        // // New quote gets saved in in storage
+        // $quote = new OHLCVQuote();
+        // $quote->setInstrument($this->instrument);
+        // $quote->setProvider($this->SUT::PROVIDER_NAME);
+        // $quote->setTimestamp($date);
+        // $quote->setTimeinterval($interval);
+        // $quote->setOpen(rand(0,100));
+        // $quote->setHigh(rand(0,100));
+        // $quote->setLow(rand(0,100));
+        // $quote->setClose(rand(0,100));
+        // $quote->setVolume(rand(0,100));
+        
+        // fwrite(STDOUT, sprintf('1: %s Open=%s Volume=%s'.PHP_EOL, $quote->getInstrument()->getSymbol(), $quote->getOpen(), $quote->getVolume()));
+        
+        // $this->SUT->saveQuote($quote);
 
-        $this->assertCount(1, $results);
+        // $results = $OHLCVQuoteRepository->findBy(['instrument' => $this->instrument]);
 
-        $this->assertSame($newQuote->getTimestamp()->format('Y-m-d'), $results[0]->getTimestamp()->format('Y-m-d'));
-    }    
+        // $this->assertCount(1, $results);
+        // // $this->assertSame($quote->getTimestamp()->format('Y-m-d'), $results[0]->getTimestamp()->format('Y-m-d'));
+        // $this->assertSame($this->computeControlSum2($quote), $this->computeControlSum2($results[0]));
+        // // $this->assertSame($this->instrument->getOHLCVQuote()->getId(), $results[0]->getId());
+
+
+
+        // $this->assertNull($this->instrument->getOHLCVQuote()->getId());
+        // $results = $OHLCVQuoteRepository->findBy(['instrument' => $this->instrument]);
+        // $this->assertNotSame($this->computeControlSum2($quote), $this->computeControlSum2($results[0]));
+
+        // $this->SUT->saveQuote($quote);
+
+        // $results = $OHLCVQuoteRepository->findBy(['instrument' => $this->instrument]);
+
+        // $this->assertCount(1, $results);
+
+        // $this->assertSame($this->computeControlSum2($quote), $this->computeControlSum2($results[0]));
+
+        // fwrite(STDOUT, sprintf('2: %s Open=%s Volume=%s'.PHP_EOL, $quote->getInstrument()->getSymbol(), $quote->getOpen(), $quote->getVolume()));
+    }
+
+    // public function test155()
+    // {
+        // fwrite(STDOUT, $this->instrument->getDescription());
+
+        // $this->instrument->setDescription('test description2');
+
+        // $this->em->persist($this->instrument);
+        // $this->em->flush();
+
+
+
+        // $quote = $this->instrument->getOHLCVQuote();
+        // fwrite(STDOUT, sprintf('id=%s Open=%s Volume=%s', $quote->getId(), $quote->getOpen(), $quote->getVolume()));
+
+        // $quote->setOpen(rand(100,1000));
+        // $quote->setVolume(rand(100,1000));
+        // $this->em->persist($quote);
+        // $this->em->flush();
+
+        // $this->assertTrue(true);
+    // }
     
     /**
      * Test retrieveQuote
      */
-    public function test160()
-    {
-        $_SERVER['TODAY'] = '2019-05-20 09:30:01'; // Monday, May 20, 2019
-        $date = new \DateTime($_SERVER['TODAY']);
-        $interval = new \DateInterval('P1D');
-        $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
+    // public function test160()
+    // {
+    //     $_SERVER['TODAY'] = '2019-05-20 09:30:01'; // Monday, May 20, 2019
+    //     $date = new \DateTime($_SERVER['TODAY']);
+    //     $interval = new \DateInterval('P1D');
+    //     $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
 
-        // Simulate saving of existing quote
-        $quote = new OHLCVQuote();
-        $quote->setInstrument($this->instrument);
-        $quote->setProvider($this->SUT::PROVIDER_NAME);
-        $quote->setTimestamp($date);
-        $quote->setTimeinterval($interval);
-        $quote->setOpen(rand(100,10000)/100);
-        $quote->setHigh(rand(100,10000)/100);
-        $quote->setLow(rand(100,10000)/100);
-        $quote->setClose(rand(100,10000)/100);
-        $quote->setVolume(rand(100,10000));
+    //     // Simulate saving of existing quote
+    //     $quote = new OHLCVQuote();
+    //     $quote->setInstrument($this->instrument);
+    //     $quote->setProvider($this->SUT::PROVIDER_NAME);
+    //     $quote->setTimestamp($date);
+    //     $quote->setTimeinterval($interval);
+    //     $quote->setOpen(rand(100,10000)/100);
+    //     $quote->setHigh(rand(100,10000)/100);
+    //     $quote->setLow(rand(100,10000)/100);
+    //     $quote->setClose(rand(100,10000)/100);
+    //     $quote->setVolume(rand(100,10000));
 
-        $this->em->persist($quote);
-        $this->em->flush();
-        $quoteId = $quote->getId();
+    //     $this->em->persist($quote);
+    //     $this->em->flush();
+    //     $quoteId = $quote->getId();
 
-        $savedQuote = $this->SUT->retrieveQuote($this->instrument);
-        var_dump($savedQuote); 
-    }    
+    //     $savedQuote = $this->SUT->retrieveQuote($this->instrument);
+    //     var_dump($savedQuote); 
+    // }    
 
     private function createMockHistory($startDate, $numberOfRecords, $interval)
     {
@@ -506,11 +568,11 @@ class OHLCV_YahooTest extends KernelTestCase
             $record->setProvider($this->SUT::PROVIDER_NAME);
             $record->setTimestamp(clone $startDate);
             $record->setTimeinterval($interval);
-            $record->setOpen(rand(100,10000)/100);
-            $record->setHigh(rand(100,10000)/100);
-            $record->setLow(rand(100,10000)/100);
-            $record->setClose(rand(100,10000)/100);
-            $record->setVolume(rand(100,10000));
+            $record->setOpen(rand(0,100));
+            $record->setHigh(rand(0,100));
+            $record->setLow(rand(0,100));
+            $record->setClose(rand(0,100));
+            $record->setVolume(rand(0,100));
 
             $this->em->persist($record);
         }
@@ -535,10 +597,10 @@ class OHLCV_YahooTest extends KernelTestCase
             $record->setProvider($this->SUT::PROVIDER_NAME);
             $record->setTimestamp(clone $startDate);
             $record->setTimeinterval($interval);
-            $record->setOpen(rand(100,10000)/100);
-            $record->setHigh(rand(100,10000)/100);
-            $record->setLow(rand(100,10000)/100);
-            $record->setClose(rand(100,10000)/100);
+            $record->setOpen(rand(100,1000));
+            $record->setHigh(rand(100,1000));
+            $record->setLow(rand(100,1000));
+            $record->setClose(rand(100,1000));
             $record->setVolume(rand(100,10000));
             $out[] = $record;
         }
@@ -551,6 +613,11 @@ class OHLCV_YahooTest extends KernelTestCase
         return $ohlcvHistory->getOpen() + $ohlcvHistory->getHigh() + $ohlcvHistory->getLow() + $ohlcvHistory->getClose() + $ohlcvHistory->getVolume();
     }
 
+    private function computeControlSum2(OHLCVQuote $quote)
+    {
+        return $quote->getOpen() + $quote->getHigh() + $quote->getLow() + $quote->getClose() + $quote->getVolume();
+    }
+
     protected function tearDown(): void
     {
         $instrumentRepository = $this->em->getRepository(Instrument::class);
@@ -559,11 +626,11 @@ class OHLCV_YahooTest extends KernelTestCase
         $query = $qb->getQuery();
         $query->execute();
 
-        $quoteRepository = $this->em->getRepository(OHLCVQuote::class);
-        // $instrumentId = $this->instrument->getId();
-        $qb = $quoteRepository->createQueryBuilder('q');
-        $qb->delete()->where('q.instrument = :instrument')->setParameter('instrument', $this->instrument);
-        $qb->getQuery()->execute();
+        // $quoteRepository = $this->em->getRepository(OHLCVQuote::class);
+        // // $instrumentId = $this->instrument->getId();
+        // $qb = $quoteRepository->createQueryBuilder('q');
+        // $qb->delete()->where('q.instrument = :instrument')->setParameter('instrument', $this->instrument);
+        // $qb->getQuery()->execute();
 
         $this->em->close();
         $this->em = null;

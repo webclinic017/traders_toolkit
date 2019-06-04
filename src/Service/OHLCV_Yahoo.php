@@ -22,7 +22,7 @@ use Scheb\YahooFinanceApi\Results\Quote;
 use App\Entity\OHLCVQuote;
 // use Doctrine\Common\Persistence\ManagerRegistry;
 // use Doctrine\ORM\EntityManagerInterface;
-// use App\Entity\Instrument;
+use App\Entity\Instrument;
 
 
 class OHLCV_Yahoo implements PriceProviderInterface
@@ -222,18 +222,76 @@ class OHLCV_Yahoo implements PriceProviderInterface
         return $quote;
  	}
  
- 	public function saveQuote($quote)
+ 	public function saveQuote($symbol, $data)
  	{
- 		$instrument = $quote->getInstrument();
 		$em = $this->doctrine->getManager();
-		// Remove an existing quote. It is supposed to be replaced by new
-		$OHLCVQuoteRepository = $em->getRepository(OHLCVQuote::class);
+ 		// $instrument = $quote->getInstrument();
+		$instrument = $em->getRepository(Instrument::class)->findOneBy(['symbol' => $symbol]);
+		// $OHLCVQuoteRepository = $em->getRepository(OHLCVQuote::class);
 
-		if ($oldQuote = $OHLCVQuoteRepository->findOneBy(['instrument' => $instrument])) $em->remove($oldQuote);
 
-		$em->persist($quote);
+ 		if ($oldQuote = $instrument->getOHLCVQuote())
+ 		{
+ 			// $oldQuote->setTimestamp($quote->getTimestamp());
+ 	  //       $oldQuote->setOpen($quote->getOpen());
+	   //      $oldQuote->setHigh($quote->getHigh());
+	   //      $oldQuote->setLow($quote->getLow());
+	   //      $oldQuote->setClose($quote->getClose());
+	   //      $oldQuote->setVolume($quote->getVolume());
 
-		$em->flush();
+ 			$oldQuote->setTimestamp(new \DateTime($data['timestamp']));
+ 			$oldQuote->setTimeinterval(new \DateInterval($data['timeinterval']));
+ 	        $oldQuote->setOpen($data['open']);
+	        $oldQuote->setHigh($data['high']);
+	        $oldQuote->setLow($data['low']);
+	        $oldQuote->setClose($data['close']);
+	        $oldQuote->setVolume($data['volume']);
+
+	        // $em->persist($oldQuote);
+	        $em->persist($instrument);
+	        $em->flush();
+ 		}
+
+ 		// var_dump($instrument->getOHLCVQuote()); exit();
+ 		// $em->persist($quote);
+ 		// $em->persist($instrument);
+ 		// $em->flush();
+		// $qb = $OHLCVQuoteRepository->createQueryBuilder('q');
+  //   	$qb->where('q.instrument = :instrument')->setParameter('instrument', $instrument);
+  //   	$query = $qb->getQuery();
+  //   	if ($result = $query->getResult()) {
+  //   		$oldQuote = array_shift($result);
+		// 	// var_dump($oldQuote); exit(); 		
+	        
+	 //        // $em->flush();
+  //   	} else {
+  //   		$em->persist($quote);
+  //   		$em->flush();
+  //   	}
+
+
+ 		// if ($oldQuote = $OHLCVQuoteRepository->findOneBy(['instrument' => $instrument])) {
+   //          ->andWhere('o.timeinterval = :interval')
+
+ 			// $em->remove($oldQuote);
+ 			// $em->flush();
+ 			// $oldQuote->setTimestamp($quote->getTimestamp());
+ 	  //       $oldQuote->setOpen($quote->getOpen());
+	   //      $oldQuote->setHigh($quote->getHigh());
+	   //      $oldQuote->setLow($quote->getLow());
+	   //      $oldQuote->setClose($quote->getClose());
+	   //      $oldQuote->setVolume($quote->getVolume());
+	        // $em->persist($oldQuote);
+
+	        // $em->flush();
+	        // $instrument->setOHLCVQuote($quote);
+	        // $em->persist($instrument);
+			// $em->persist($quote);
+			// $em->flush();
+ 		// } else {
+			// $em->persist($quote);
+			// $em->flush();
+ 		// }
  	}
  
  	public function addQuoteToHistory($quote, $history) {}
@@ -241,7 +299,7 @@ class OHLCV_Yahoo implements PriceProviderInterface
 	public function retrieveQuote($instrument)
 	{
 		// $this->doctrine->getRepository();
-		return $instrument->getOHLCVQuotes();
+		return $instrument->getOHLCVQuote();
 	}
 
 	public function downloadClosingPrice($instrument) {}

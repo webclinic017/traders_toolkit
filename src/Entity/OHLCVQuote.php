@@ -42,12 +42,6 @@ class OHLCVQuote
     private $volume;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVQuotes")
-     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
-     */
-    private $instrument;
-
-    /**
      * @ORM\Column(type="dateinterval", nullable=true)
      */
     private $timeinterval;
@@ -61,6 +55,12 @@ class OHLCVQuote
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $provider;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVQuote")
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
+     */
+    private $instrument;
 
     public function getId(): ?int
     {
@@ -127,18 +127,6 @@ class OHLCVQuote
         return $this;
     }
 
-    public function getInstrument(): ?Instrument
-    {
-        return $this->instrument;
-    }
-
-    public function setInstrument(?Instrument $instrument): self
-    {
-        $this->instrument = $instrument;
-
-        return $this;
-    }
-
     public function getTimeinterval(): ?\DateInterval
     {
         return $this->timeinterval;
@@ -171,6 +159,19 @@ class OHLCVQuote
     public function setProvider(?string $provider): self
     {
         $this->provider = $provider;
+
+        return $this;
+    }
+
+    public function getInstrument(): ?Instrument
+    {
+        return $this->instrument;
+    }
+
+    public function setInstrument(Instrument $instrument): self
+    {
+        $this->instrument = $instrument;
+        $instrument->setOHLCVQuote($this);
 
         return $this;
     }

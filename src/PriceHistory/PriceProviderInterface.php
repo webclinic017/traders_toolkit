@@ -63,9 +63,10 @@ interface PriceProviderInterface
  	 * Saves given quote in storage. For any given instrument, only one quote supposed to be saved in storage.
  	 * If this function is called with existing quote already in storage, existing quote will be reomoved, and
  	 * new one saved.
+ 	 * @param App\Entity\Instrument
  	 * @param App\Entity\OHLCVQuote
  	 */
- 	public function saveQuote($quote);
+ 	public function saveQuote($symbol, $data);
  
  	public function addQuoteToHistory($quote, $history);
  

@@ -42,7 +42,7 @@ class OHLCVHistory
     private $volume;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVHistories")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Instrument", inversedBy="oHLCVHistories", cascade={"detach"})
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $instrument;
