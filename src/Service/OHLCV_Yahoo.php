@@ -56,20 +56,23 @@ class OHLCV_Yahoo implements PriceProviderInterface
 
 	private $exchangeEquities;
 
-	// private $em;
+	public $em;
 
-	private $doctrine;
+	// public $doctrine;
 
-
+ 	/**
+ 	 * {@inheritDoc}
+ 	 */
 	public function __construct(Exchange_Equities $exchangeEquities, RegistryInterface $registry)
 	{
 		$this->priceProvider = ApiClientFactory::createApiClient();
 		$this->exchangeEquities = $exchangeEquities;
-		// $this->em = $em;
-		$this->doctrine = $registry;
+		// $this->doctrine = $registry;
+		$this->em = $registry->getManager();
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @param array $options ['interval' => 'P1M|P1W|P1D' ]
 	 */
 	public function downloadHistory($instrument, $fromDate, $toDate, $options)
@@ -146,27 +149,31 @@ class OHLCV_Yahoo implements PriceProviderInterface
 		return $history;
 	}
 
+ 	/**
+ 	 * {@inheritDoc}
+ 	 */
 	public function addHistory($instrument, $history) {
 		if (!empty($history)) {
 			// delete existing OHLCV History for the given instrument from history start date to current date
-			$OHLCVRepository = $this->doctrine->getRepository(OHLCVHistory::class);
+			$OHLCVRepository = $this->em->getRepository(OHLCVHistory::class);
 			// var_dump(get_class($OHLCVRepository)); exit();
 			$fromDate = $history[0]->getTimestamp();
 			$interval = $history[0]->getTimeinterval();
 			$OHLCVRepository->deleteHistory($instrument, $fromDate, null, $interval, self::PROVIDER_NAME);
 
-			$em = $this->doctrine->getManager();
+			// $em = $this->doctrine->getManager();
 
 			// save the given history
 			foreach ($history as $record) {
-            	$em->persist($record);
+            	$this->em->persist($record);
         	}
 
-        	$em->flush();
+        	$this->em->flush();
 		}
 	}
  
 	/**
+	 * {@inheritDoc}
 	 * @param array $options ['interval' => 'P1M|P1W|P1D' ]
 	 */
  	public function exportHistory($history, $path, $options) {
@@ -174,6 +181,7 @@ class OHLCV_Yahoo implements PriceProviderInterface
  	}
  
 	/**
+	 * {@inheritDoc}
 	 * @param array $options ['interval' => 'P1M|P1W|P1D' ]
 	 */
  	public function retrieveHistory($instrument, $fromDate, $toDate, $options)
@@ -191,6 +199,9 @@ class OHLCV_Yahoo implements PriceProviderInterface
  		return $OHLCVRepository->retrieveHistory($instrument, $fromDate, $toDate, $interval, self::PROVIDER_NAME);
  	}
  
+ 	/**
+ 	 * {@inheritDoc}
+ 	 */
  	public function downloadQuote($instrument) {
  		if ('test' == $_SERVER['APP_ENV'] && isset($_SERVER['TODAY'])) {
 			$today = $_SERVER['TODAY'];
@@ -222,86 +233,62 @@ class OHLCV_Yahoo implements PriceProviderInterface
         return $quote;
  	}
  
- 	public function saveQuote($symbol, $data)
+ 	/**
+ 	 * {@inheritDoc}
+ 	 * @param array $quote ['open' => float, 'high' => float, 'low' => float, 'close' => float, 'volume' => integer, 'timestamp' => \DateTime, 'interval' => string]
+ 	 */
+ 	public function saveQuote($instrument, $quoteData)
  	{
-		$em = $this->doctrine->getManager();
- 		// $instrument = $quote->getInstrument();
-		$instrument = $em->getRepository(Instrument::class)->findOneBy(['symbol' => $symbol]);
-		// $OHLCVQuoteRepository = $em->getRepository(OHLCVQuote::class);
-
+	    if (!in_array($quote['interval'], $this->intervals)) throw new PriceHistoryException(sprintf('Interval `%s` is not supported.'));
 
  		if ($oldQuote = $instrument->getOHLCVQuote())
  		{
- 			// $oldQuote->setTimestamp($quote->getTimestamp());
- 	  //       $oldQuote->setOpen($quote->getOpen());
-	   //      $oldQuote->setHigh($quote->getHigh());
-	   //      $oldQuote->setLow($quote->getLow());
-	   //      $oldQuote->setClose($quote->getClose());
-	   //      $oldQuote->setVolume($quote->getVolume());
+ 			$oldQuote->setTimestamp($quote['timestamp']);
+ 	        $oldQuote->setOpen($quote['open']);
+	        $oldQuote->setHigh($quote['high']);
+	        $oldQuote->setLow($quote['low']);
+	        $oldQuote->setClose($quote['close']);
+	        $oldQuote->setVolume($quote['volume']);
+	        $oldQuote->setTimeinterval(new \DateInterval($quote['interval']));
+	        $oldQuote->setProvider(self::PROVIDER_NAME);
+ 		} else {
+ 			$newQuote = new OHLCVQuote();
+	        $newQuote->setTimestamp($quote['timestamp']);
+	        $newQuote->setOpen($quote['open']);
+	        $newQuote->setHigh($quote['high']);
+	        $newQuote->setLow($quote['low']);
+	        $newQuote->setClose($quote['close']);
+	        $newQuote->setVolume($quote['volume']);
+	        $newQuote->setTimeinterval(new \DateInterval($quote['interval']));
+	        $newQuote->setProvider(self::PROVIDER_NAME);
+	        $newQuote->setInstrument($instrument);
 
- 			$oldQuote->setTimestamp(new \DateTime($data['timestamp']));
- 			$oldQuote->setTimeinterval(new \DateInterval($data['timeinterval']));
- 	        $oldQuote->setOpen($data['open']);
-	        $oldQuote->setHigh($data['high']);
-	        $oldQuote->setLow($data['low']);
-	        $oldQuote->setClose($data['close']);
-	        $oldQuote->setVolume($data['volume']);
-
-	        // $em->persist($oldQuote);
-	        $em->persist($instrument);
-	        $em->flush();
+			$instrument->setOHLCVQuote($newQuote); 			
  		}
-
- 		// var_dump($instrument->getOHLCVQuote()); exit();
- 		// $em->persist($quote);
- 		// $em->persist($instrument);
- 		// $em->flush();
-		// $qb = $OHLCVQuoteRepository->createQueryBuilder('q');
-  //   	$qb->where('q.instrument = :instrument')->setParameter('instrument', $instrument);
-  //   	$query = $qb->getQuery();
-  //   	if ($result = $query->getResult()) {
-  //   		$oldQuote = array_shift($result);
-		// 	// var_dump($oldQuote); exit(); 		
-	        
-	 //        // $em->flush();
-  //   	} else {
-  //   		$em->persist($quote);
-  //   		$em->flush();
-  //   	}
-
-
- 		// if ($oldQuote = $OHLCVQuoteRepository->findOneBy(['instrument' => $instrument])) {
-   //          ->andWhere('o.timeinterval = :interval')
-
- 			// $em->remove($oldQuote);
- 			// $em->flush();
- 			// $oldQuote->setTimestamp($quote->getTimestamp());
- 	  //       $oldQuote->setOpen($quote->getOpen());
-	   //      $oldQuote->setHigh($quote->getHigh());
-	   //      $oldQuote->setLow($quote->getLow());
-	   //      $oldQuote->setClose($quote->getClose());
-	   //      $oldQuote->setVolume($quote->getVolume());
-	        // $em->persist($oldQuote);
-
-	        // $em->flush();
-	        // $instrument->setOHLCVQuote($quote);
-	        // $em->persist($instrument);
-			// $em->persist($quote);
-			// $em->flush();
- 		// } else {
-			// $em->persist($quote);
-			// $em->flush();
- 		// }
+        $this->em->persist($instrument);
+        $this->em->flush();
  	}
  
- 	public function addQuoteToHistory($quote, $history) {}
- 
+ 	/**
+ 	 * {@inheritDoc}
+ 	 */
+ 	public function addQuoteToHistory($quote, $history)
+ 	{
+
+
+ 	}
+
+  	/**
+ 	 * {@inheritDoc}
+ 	 */
 	public function retrieveQuote($instrument)
 	{
-		// $this->doctrine->getRepository();
 		return $instrument->getOHLCVQuote();
 	}
 
+ 	/**
+ 	 * {@inheritDoc}
+ 	 */
 	public function downloadClosingPrice($instrument) {}
 
 	private function sortHistory(&$history)

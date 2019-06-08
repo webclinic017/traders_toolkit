@@ -64,10 +64,15 @@ interface PriceProviderInterface
  	 * If this function is called with existing quote already in storage, existing quote will be reomoved, and
  	 * new one saved.
  	 * @param App\Entity\Instrument
- 	 * @param App\Entity\OHLCVQuote
+ 	 * @param array $quoteData may contain any quote-like data compatible with the implementation of this PriceInterface
  	 */
- 	public function saveQuote($symbol, $data);
+ 	public function saveQuote($instrument, $quoteData);
  
+ 	/**
+ 	 * Adds a quote object to array of history
+ 	 * @param array $quote may contain any quote-like data compatible with the implementation of this PriceInterface
+ 	 * @param array $history with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
+ 	 */
  	public function addQuoteToHistory($quote, $history);
  
  	/**

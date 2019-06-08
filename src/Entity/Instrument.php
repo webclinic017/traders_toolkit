@@ -164,4 +164,9 @@ class Instrument
 
         return $this;
     }
+
+    public function unsetOHLCVQuote()
+    {
+        $this->oHLCVQuote = null;
+    }
 }

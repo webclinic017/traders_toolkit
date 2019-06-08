@@ -171,7 +171,7 @@ class OHLCVQuote
     public function setInstrument(Instrument $instrument): self
     {
         $this->instrument = $instrument;
-        $instrument->setOHLCVQuote($this);
+        // $instrument->setOHLCVQuote($this);
 
         return $this;
     }
