@@ -235,35 +235,42 @@ class OHLCV_Yahoo implements PriceProviderInterface
  
  	/**
  	 * {@inheritDoc}
- 	 * @param array $quote ['open' => float, 'high' => float, 'low' => float, 'close' => float, 'volume' => integer, 'timestamp' => \DateTime, 'interval' => string]
+ 	 * @param App\Entity\OHLCVQuote $quote
  	 */
- 	public function saveQuote($instrument, $quoteData)
+ 	public function saveQuote($instrument, $quote)
  	{
-	    if (!in_array($quote['interval'], $this->intervals)) throw new PriceHistoryException(sprintf('Interval `%s` is not supported.'));
+	    // if (!in_array($quote['interval'], $this->intervals)) throw new PriceHistoryException(sprintf('Interval `%s` is not supported.'));
 
  		if ($oldQuote = $instrument->getOHLCVQuote())
  		{
- 			$oldQuote->setTimestamp($quote['timestamp']);
- 	        $oldQuote->setOpen($quote['open']);
-	        $oldQuote->setHigh($quote['high']);
-	        $oldQuote->setLow($quote['low']);
-	        $oldQuote->setClose($quote['close']);
-	        $oldQuote->setVolume($quote['volume']);
-	        $oldQuote->setTimeinterval(new \DateInterval($quote['interval']));
+ 			// $oldQuote->setTimestamp($quote['timestamp']);
+ 	  //       $oldQuote->setOpen($quote['open']);
+	   //      $oldQuote->setHigh($quote['high']);
+	   //      $oldQuote->setLow($quote['low']);
+	   //      $oldQuote->setClose($quote['close']);
+	   //      $oldQuote->setVolume($quote['volume']);
+	   //      $oldQuote->setTimeinterval(new \DateInterval($quote['interval']));
+ 			$oldQuote->setTimestamp($quote->getTimestamp());
+ 	        $oldQuote->setOpen($quote->getOpen());
+	        $oldQuote->setHigh($quote->getHigh());
+	        $oldQuote->setLow($quote->getLow());
+	        $oldQuote->setClose($quote->getClose());
+	        $oldQuote->setVolume($quote->getVolume());
+	        $oldQuote->setTimeinterval($quote->getTimeinterval());
 	        $oldQuote->setProvider(self::PROVIDER_NAME);
  		} else {
- 			$newQuote = new OHLCVQuote();
-	        $newQuote->setTimestamp($quote['timestamp']);
-	        $newQuote->setOpen($quote['open']);
-	        $newQuote->setHigh($quote['high']);
-	        $newQuote->setLow($quote['low']);
-	        $newQuote->setClose($quote['close']);
-	        $newQuote->setVolume($quote['volume']);
-	        $newQuote->setTimeinterval(new \DateInterval($quote['interval']));
-	        $newQuote->setProvider(self::PROVIDER_NAME);
-	        $newQuote->setInstrument($instrument);
+ 		// 	$newQuote = new OHLCVQuote();
+	  //       $newQuote->setTimestamp($quote['timestamp']);
+	  //       $newQuote->setOpen($quote['open']);
+	  //       $newQuote->setHigh($quote['high']);
+	  //       $newQuote->setLow($quote['low']);
+	  //       $newQuote->setClose($quote['close']);
+	  //       $newQuote->setVolume($quote['volume']);
+	  //       $newQuote->setTimeinterval(new \DateInterval($quote['interval']));
+	  //       $newQuote->setProvider(self::PROVIDER_NAME);
+	  //       $newQuote->setInstrument($instrument);
 
-			$instrument->setOHLCVQuote($newQuote); 			
+			$instrument->setOHLCVQuote($quote);
  		}
         $this->em->persist($instrument);
         $this->em->flush();

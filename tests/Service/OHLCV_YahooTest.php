@@ -434,8 +434,8 @@ class OHLCV_YahooTest extends KernelTestCase
     {
         $_SERVER['TODAY'] = '2019-05-20 09:30:01'; // Monday, May 20, 2019
         $date = new \DateTime($_SERVER['TODAY']);
-        // $interval = new \DateInterval('P1D');
-        $interval = 'P1D';
+        $interval = new \DateInterval('P1D');
+        // $interval = 'P1D';
 
         $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
 
@@ -449,7 +449,7 @@ class OHLCV_YahooTest extends KernelTestCase
         $quote->setInstrument($this->instrument);
         $quote->setProvider($this->SUT::PROVIDER_NAME);
         $quote->setTimestamp($date);
-        $quote->setTimeinterval(new \DateInterval($interval));
+        $quote->setTimeinterval($interval);
         $quote->setOpen(102);
         $quote->setHigh(202);
         $quote->setLow(302);
@@ -460,15 +460,25 @@ class OHLCV_YahooTest extends KernelTestCase
         $this->em->persist($this->instrument);
         $this->em->flush();
 
-        $quote = [
-            'timestamp' => $date,
-            'open' => 103, 
-            'high' => 203, 
-            'low' => 303, 
-            'close' => 403, 
-            'volume' => 503, 
-            'interval' => $interval
-        ];
+        // $quote = [
+        //     'timestamp' => $date,
+        //     'open' => 103, 
+        //     'high' => 203, 
+        //     'low' => 303, 
+        //     'close' => 403, 
+        //     'volume' => 503, 
+        //     'interval' => $interval
+        // ];
+        $quote = new OHLCVQuote();
+        $quote->setInstrument($this->instrument);
+        $quote->setProvider($this->SUT::PROVIDER_NAME);
+        $quote->setTimestamp($date);
+        $quote->setTimeinterval($interval);
+        $quote->setOpen(103);
+        $quote->setHigh(203);
+        $quote->setLow(303);
+        $quote->setClose(403);
+        $quote->setVolume(503);
 
         $this->SUT->saveQuote($this->instrument, $quote);
 
@@ -476,8 +486,9 @@ class OHLCV_YahooTest extends KernelTestCase
 
         $this->assertCount(1, $results);
         // // $this->assertSame($quote->getTimestamp()->format('Y-m-d'), $results[0]->getTimestamp()->format('Y-m-d'));
-        unset($quote['timestamp'], $quote['interval']);
-        $this->assertEquals(array_sum($quote), $this->computeControlSum2($results[0]));
+        // unset($quote['timestamp'], $quote['interval']);
+        // $this->assertEquals(array_sum($quote), $this->computeControlSum2($results[0]));
+        $this->assertEquals($this->computeControlSum2($quote), $this->computeControlSum2($results[0]));
         // // $this->assertSame($this->instrument->getOHLCVQuote()->getId(), $results[0]->getId());
     }
 
@@ -489,8 +500,8 @@ class OHLCV_YahooTest extends KernelTestCase
     {
         $_SERVER['TODAY'] = '2019-05-20 09:30:01'; // Monday, May 20, 2019
         $date = new \DateTime($_SERVER['TODAY']);
-        // $interval = new \DateInterval('P1D');
-        $interval = 'P1D';
+        $interval = new \DateInterval('P1D');
+        // $interval = 'P1D';
 
         $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
 
@@ -500,22 +511,34 @@ class OHLCV_YahooTest extends KernelTestCase
         $query->execute();
         $this->instrument->unsetOHLCVQuote();
 
-        $quote = [
-            'timestamp' => $date,
-            'open' => 103, 
-            'high' => 203, 
-            'low' => 303, 
-            'close' => 403, 
-            'volume' => 503, 
-            'interval' => $interval
-        ];
+        // $quote = [
+        //     'timestamp' => $date,
+        //     'open' => 103, 
+        //     'high' => 203, 
+        //     'low' => 303, 
+        //     'close' => 403, 
+        //     'volume' => 503, 
+        //     'interval' => $interval
+        // ];
         
+        $quote = new OHLCVQuote();
+        $quote->setInstrument($this->instrument);
+        $quote->setProvider($this->SUT::PROVIDER_NAME);
+        $quote->setTimestamp($date);
+        $quote->setTimeinterval($interval);
+        $quote->setOpen(103);
+        $quote->setHigh(203);
+        $quote->setLow(303);
+        $quote->setClose(403);
+        $quote->setVolume(503);
+
         $this->SUT->saveQuote($this->instrument, $quote);
 
         $results = $OHLCVQuoteRepository->findBy(['instrument' => $this->instrument]);
 
         $this->assertCount(1, $results);
-        $this->assertEquals(array_sum($quote), $this->computeControlSum2($results[0]));
+        // $this->assertEquals(array_sum($quote), $this->computeControlSum2($results[0]));
+        $this->assertEquals($this->computeControlSum2($quote), $this->computeControlSum2($results[0]));
     }
 
 
