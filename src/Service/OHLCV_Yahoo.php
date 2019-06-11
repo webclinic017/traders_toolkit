@@ -194,7 +194,7 @@ class OHLCV_Yahoo implements PriceProviderInterface
  			$interval = new \DateInterval('P1D');
  		}
 
- 		$OHLCVRepository = $this->doctrine->getRepository(OHLCVHistory::class);
+ 		$OHLCVRepository = $this->em->getRepository(OHLCVHistory::class);
 
  		return $OHLCVRepository->retrieveHistory($instrument, $fromDate, $toDate, $interval, self::PROVIDER_NAME);
  	}
@@ -279,10 +279,81 @@ class OHLCV_Yahoo implements PriceProviderInterface
  	/**
  	 * {@inheritDoc}
  	 */
- 	public function addQuoteToHistory($quote, $history)
+ 	public function addQuoteToHistory($quote, $history = [])
  	{
+ 		if (!empty($history)) {
+ 			end($history);
+ 			$lastElement = current($history);
+ 			$indexOfLastElement = key($history);
 
+ 			// check if instruments match
+ 			if ($lastElement->getInstrument()->getSymbol() != $quote->getInstrument()->getSymbol()) throw new PriceHistoryException('Instrments in history and quote don\'t match');
+ 			// check if intervals match
+ 			$historyInterval = $lastElement->getTimeinterval();
+ 			$quoteInterval = $quote->getTimeinterval();
+ 			if ($this->convertInterval($historyInterval, 's') != $this->convertInterval($quoteInterval, 's')) throw new PriceHistoryException('Time intervals in history and quote don\'t match');
 
+ 			// check if quote date is the same as latest history date, then just overwrite, return $history modified
+ 			if ($lastElement->getTimestamp()->format('Y-m-d') == $quote->getTimestamp()->format('Y-m-d')) {
+ 				$lastElement->setTimestamp($quote->getTimestamp());
+ 				$lastElement->setOpen($quote->getOpen());
+ 				$lastElement->setHigh($quote->getHigh());
+ 				$lastElement->setLow($quote->getLow());
+ 				$lastElement->setClose($quote->getClose());
+ 				$lastElement->setVolume($quote->getVolume());
+ 				
+ 				$history[$indexOfLastElement] = $lastElement;
+
+ 				reset($history); // resets array pointer to first element
+ 				
+ 				return $history;
+ 			}
+ 			// check if latest history date is prevT (previous trading period for weekly, monthly, and yearly) from quote date, then add quote on top of history, return $history modified
+ 			else {
+ 				// depending on time interval we must handle the prevT differently
+ 				switch ($quoteInterval) {
+ 					case 1 == $quoteInterval->d :
+ 						$prevT = $this->exchangeEquities->calcPreviousTradingDay($quote->getTimestamp());
+ 						if ($lastElement->getTimestamp()->format('Y-m-d') == $prevT->format('Y-m-d')) {
+				            $lastElement = new OHLCVHistory();
+				            $lastElement->setInstrument($quote->getInstrument());
+				            $lastElement->setProvider(self::PROVIDER_NAME);
+				            $lastElement->setTimestamp($quote->getTimestamp());
+				            $lastElement->setTimeinterval($quoteInterval);
+			 				$lastElement->setOpen($quote->getOpen());
+			 				$lastElement->setHigh($quote->getHigh());
+			 				$lastElement->setLow($quote->getLow());
+			 				$lastElement->setClose($quote->getClose());
+			 				$lastElement->setVolume($quote->getVolume());
+
+			 				$history[] = $lastElement;
+
+			 				reset($history); // resets array pointer to first element
+ 				
+			 				return $history;
+ 						} 
+ 					break;
+ 					case 7 == $quoteInterval->d :
+
+ 					break;
+ 					case 1 == $quoteInterval->m :
+
+ 					break;
+ 					case 1 == $quoteInterval->y :
+
+ 					break;
+ 				}
+
+ 				// otherwise you have a gap, return false
+ 				return false;
+ 			}
+ 		} 
+ 		// // check if there is history in storage. Repeat above logic
+ 		// elseif () {
+
+ 		// } 
+ 		// if there is no history in storage return null
+ 		// return null;
  	}
 
   	/**
@@ -298,6 +369,8 @@ class OHLCV_Yahoo implements PriceProviderInterface
  	 */
 	public function downloadClosingPrice($instrument) {}
 
+	public function addClosingPriceToHistory($closingPrice, $history) {}
+
 	private function sortHistory(&$history)
 	{
 		uasort($history, function($a, $b) {
@@ -306,5 +379,22 @@ class OHLCV_Yahoo implements PriceProviderInterface
 			}
 			return ($a->getTimestamp()->format('U') < $b->getTimestamp()->format('U')) ? -1 : 1;
 		});
+	}
+
+	/**
+	 * Converts DateInterval into a given unit. For now supports only seconds (s)
+	 * @param \DateInterval $interval
+	 * @param string $unit
+	 * @return integer $result
+	 */
+	private function convertInterval($interval, $unit)
+	{
+		switch ($unit) {
+			case 's':
+				$result = 86400 * ($interval->y * 365 + $interval->m * 28.5 + $interval->d) + $interval->h * 3600 + $interval->m * 60 + $interval->s;
+ 				break;
+		}
+
+		return $result;
 	}
 }

@@ -157,7 +157,7 @@ class OHLCV_YahooTest extends KernelTestCase
      */
     public function test50()
     {
-        $this->markTestSkipped();
+        // $this->markTestSkipped();
         $toDate = new \DateTime('2019-04-19'); // Friday, April 19, 2019 Good Friday
         $fromDate = clone $toDate;
         $fromDate->sub(new \DateInterval('P1W'));
@@ -311,7 +311,7 @@ class OHLCV_YahooTest extends KernelTestCase
 
         // rollback db storage
         // $this->em->getConnection()->rollBack();
-        exit();
+        // exit();
     }
 
     /**
@@ -541,36 +541,48 @@ class OHLCV_YahooTest extends KernelTestCase
         $this->assertEquals($this->computeControlSum2($quote), $this->computeControlSum2($results[0]));
     }
 
-
     /**
+     * Daily interval
      * Test addQuoteToHistory
+     * History is passed as array
      */
-    // public function test160()
-    // {
-    //     $_SERVER['TODAY'] = '2019-05-20 09:30:01'; // Monday, May 20, 2019
-    //     $date = new \DateTime($_SERVER['TODAY']);
-    //     $interval = new \DateInterval('P1D');
-    //     $OHLCVQuoteRepository = $this->em->getRepository(OHLCVQuote::class);
+    public function test160()
+    {
+        $startDate = new \DateTime('2018-05-14'); // Monday;
+        $interval = new \DateInterval('P1D');
+        $history = $this->createSimulatedDownload($this->instrument, $startDate, $numberOfRecords = 5, $interval);
 
-    //     // Simulate saving of existing quote
-    //     $quote = new OHLCVQuote();
-    //     $quote->setInstrument($this->instrument);
-    //     $quote->setProvider($this->SUT::PROVIDER_NAME);
-    //     $quote->setTimestamp($date);
-    //     $quote->setTimeinterval($interval);
-    //     $quote->setOpen(rand(100,10000)/100);
-    //     $quote->setHigh(rand(100,10000)/100);
-    //     $quote->setLow(rand(100,10000)/100);
-    //     $quote->setClose(rand(100,10000)/100);
-    //     $quote->setVolume(rand(100,10000));
+        // Quote is the same date as last date in history
+        $endDate = $startDate->sub($interval);
 
-    //     $this->em->persist($quote);
-    //     $this->em->flush();
-    //     $quoteId = $quote->getId();
+        $quote = new OHLCVQuote();
+        $quote->setInstrument($this->instrument);
+        $quote->setProvider($this->SUT::PROVIDER_NAME);
+        $quote->setTimestamp($endDate); // will be 2018-05-18
+        $quote->setTimeinterval($interval);
+        $quote->setOpen(103);
+        $quote->setHigh(203);
+        $quote->setLow(303);
+        $quote->setClose(403);
+        $quote->setVolume(503);
 
-    //     $savedQuote = $this->SUT->retrieveQuote($this->instrument);
-    //     var_dump($savedQuote); 
-    // }    
+        $newHistory = $this->SUT->addQuoteToHistory($quote, $history);
+
+        $this->assertCount(5, $newHistory);
+
+        $element = array_pop($newHistory);
+
+        $this->assertSame($element->getTimestamp()->format('Y-m-d'), $quote->getTimestamp()->format('Y-m-d'));
+
+        // Quote is next T from last day in history
+        // ...
+
+        // Quote is a gap from history
+        // ...
+
+        // Quote is inside history
+        // ...
+    } 
 
     private function createMockHistory($startDate, $numberOfRecords, $interval)
     {

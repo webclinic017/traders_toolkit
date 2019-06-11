@@ -127,7 +127,7 @@ class OHLCVHistory
         return $this;
     }
 
-    public function getInsrument(): ?Instrument
+    public function getInstrument(): ?Instrument
     {
         return $this->instrument;
     }

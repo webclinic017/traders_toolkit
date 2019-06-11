@@ -34,6 +34,9 @@ class Exchange_Equities implements ExchangeInterface
 		// $this->holidays = new OfficialHolidaysFilter($holidays->holidaysProvider->getIterator());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function isTradingDay($date) 
 	{
 		if ( $this->holidaysProvider->getYear() != (int)$date->format('Y')) {
@@ -92,11 +95,17 @@ class Exchange_Equities implements ExchangeInterface
 		return ($datetime->format('U') % 86400 + $secondsOffsetFromUTC > 9.5*3600 && $datetime->format('U') % 86400 + $secondsOffsetFromUTC < 16*3600 )? true : false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function getTradedInstruments($exchange)
 	{
 		return ($this->instrumentRepository->findBy(['exchange' => $exchange]));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function isTraded($symbol, $exchange) 
 	{
 		return ($this->instrumentRepository->findOneBy(['symbol' => $symbol, 'exchange' => $exchange]))? true : false;
@@ -113,6 +122,9 @@ class Exchange_Equities implements ExchangeInterface
 		$this->holidaysProvider->removeHoliday('veteransDay');
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function calcPreviousTradingDay($date)
 	{
 		$interval = new \DateInterval('P1D');

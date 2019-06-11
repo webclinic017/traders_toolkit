@@ -39,7 +39,13 @@ interface PriceProviderInterface
 	 * @param array $history with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
 	 */
  	public function addHistory($instrument, $history);
- 
+	
+	/**
+	  * Will export history from storage into file system
+	  * @param array $history
+	  * @param string $path
+	  * @param array $options
+	  */
  	public function exportHistory($history, $path, $options);
  
  	/**
@@ -61,7 +67,7 @@ interface PriceProviderInterface
  
  	/**
  	 * Saves given quote in storage. For any given instrument, only one quote supposed to be saved in storage.
- 	 * If this function is called with existing quote already in storage, existing quote will be reomoved, and
+ 	 * If this function is called with existing quote already in storage, existing quote will be reomoved and
  	 * new one saved.
  	 * @param App\Entity\Instrument
  	 * @param App\Entity\Quote compatible with the implementation of this PriceInterface
@@ -69,10 +75,13 @@ interface PriceProviderInterface
  	public function saveQuote($instrument, $quote);
  
  	/**
- 	 * Adds a quote object to array of history
+ 	 * Adds a quote object to array of history. No gaps allowed, i.e. if quote date would skip at least one trading day in history,
+ 	 *   no addition will be performed.
  	 * @param App\Entity\Quote compatible with the implementation of this PriceInterface
- 	 * @param array $history with price history compatible with chosen storage format (Doctrine Entities, csv records, etc.)
- 	 *  OR null. If null, then quote will be added directly to db history storage
+ 	 * @param array $history with elements compatible with chosen storage format (Doctrine Entities, csv records, etc.)
+ 	 *  OR null. If null then quote will be added directly to db history storage.
+ 	 *  If no history storage exists, nothing will be done.
+ 	 * @return modified $history | true (history is in storage) on success, null if nothing was added, false if gap was determined
  	 */
  	public function addQuoteToHistory($quote, $history);
  
@@ -83,11 +92,16 @@ interface PriceProviderInterface
 	public function retrieveQuote($instrument);
 
 	/**
-	 * Closing Prices are downloaded when market is closed and will return values
-	 * for the closing price on last known trading day.
+	 * Closing Prices are downloaded when market is closed and will return values for the closing price on last known trading day.
+	 * This function is intended to be used same way as downloadQuote, EXCEPT it returns values when market is closed.
 	 * @param App\Entity\Instrument $instrument
-	 * @return App\Entity\History when market is closed or null if market is open.
+	 * @return App\Entity\Quote when market is closed or null if market is open.
 	 */
 	public function downloadClosingPrice($instrument);
+
+	/**
+	 * @see addQuoteToHistory()
+	 */
+	public function addClosingPriceToHistory($closingPrice, $history);
 
 }
