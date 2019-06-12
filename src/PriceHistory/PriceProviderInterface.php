@@ -100,6 +100,13 @@ interface PriceProviderInterface
 	public function downloadClosingPrice($instrument);
 
 	/**
+	 * Retrieves latest closing price from price history
+	 * @param App\Entity\Instrument
+	 * @return $history item compatible with chosen storage format (Doctrine Entities, csv records, etc. I.e. App\Entity\OHLCVHistory)
+	 */
+	public function retrieveClosingPrice($instrument);
+
+	/**
 	 * @see addQuoteToHistory()
 	 */
 	public function addClosingPriceToHistory($closingPrice, $history);

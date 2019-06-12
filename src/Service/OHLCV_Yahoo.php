@@ -152,7 +152,8 @@ class OHLCV_Yahoo implements PriceProviderInterface
  	/**
  	 * {@inheritDoc}
  	 */
-	public function addHistory($instrument, $history) {
+	public function addHistory($instrument, $history)
+	{
 		if (!empty($history)) {
 			// delete existing OHLCV History for the given instrument from history start date to current date
 			$OHLCVRepository = $this->em->getRepository(OHLCVHistory::class);
@@ -176,7 +177,8 @@ class OHLCV_Yahoo implements PriceProviderInterface
 	 * {@inheritDoc}
 	 * @param array $options ['interval' => 'P1M|P1W|P1D' ]
 	 */
- 	public function exportHistory($history, $path, $options) {
+ 	public function exportHistory($history, $path, $options)
+ 	{
  		throw new PriceHistoryException('exportHistory is not yet implemented.');
  	}
  
@@ -368,6 +370,8 @@ class OHLCV_Yahoo implements PriceProviderInterface
  	 * {@inheritDoc}
  	 */
 	public function downloadClosingPrice($instrument) {}
+
+	public function retrieveClosingPrice($instrument) {}
 
 	public function addClosingPriceToHistory($closingPrice, $history) {}
 
