@@ -59,7 +59,6 @@ class ListSync
 			$history = $this->priceProvider->downloadHistory($instrument, $fromDate, $toDate, $options);
 		}
 
-
 		// last history price is older than PrevT: we have a gap
 		// download and add history from last history price to today
 			// continue if successful, otherwise we cannot fill the gap. Except.
