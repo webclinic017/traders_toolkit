@@ -405,7 +405,7 @@ class OHLCV_Yahoo implements PriceProviderInterface
 		} else {
 			$prevT = $this->exchangeEquities->calcPreviousTradingDay($dateTime);
 			// get 1 day history for prevT
-			$gapHistory = $this->downloadHistory($instrument, $prevT, $dateTime, ['interval' => 'P1D' ])
+			$gapHistory = $this->downloadHistory($instrument, $prevT, $dateTime, ['interval' => 'P1D' ]);
 			$closingPrice = array_pop($gapHistory);
 
 			$historyItem = new OHLCVHistory();

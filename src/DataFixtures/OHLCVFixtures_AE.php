@@ -57,25 +57,29 @@ class OHLCVFixtures_AE extends Fixture implements FixtureGroupInterface
     }
 
     /**
-     * Imports files from the defined data directory
-     * @param string $suffix for the file name
+     * Imports csv files from the defined data directory.
+     * Columns in files must follow strict order: Date, Open, High, Low, Close, Volume. Rest of the columns will be ignored.
+     * File names must be similar to: AAPL_d.csv or ABX_w.csv
+     * @param string $suffix for the file name, i.e. _d.csv
+     * @param $output
      * @return integer number of files imported
+     * @throws \Exception
      */
     
-    private function importFiles($suffix, $output) 
+    private function importFiles($suffix, $output)
     {
         $repository = $this->manager->getRepository(\App\Entity\Instrument::class);
         // Build filemap by mask
         $finder = new Finder();
         // debug: will display how many files of each letter found 
-        // foreach ($this->getLetter() as $letter) {
-        //     $finder = new Finder();
-        //     $pattern = sprintf('/^[%s][A-Z]*%s/', $letter, $suffix); 
-        //     // var_dump($pattern); exit();
-        //     $count = $finder->in(self::DIRECTORY)->files()->name($pattern)->sortByName()->count();
-        //     $output->writeln(sprintf('%s: %d', $letter, $count));
-        // }
-        // exit();
+//         foreach ($this->getLetter() as $letter) {
+//             $finder = new Finder();
+//             $pattern = sprintf('/^[%s][A-Z]*%s/', $letter, $suffix);
+//             // var_dump($pattern); exit();
+//             $count = $finder->in(self::DIRECTORY)->files()->name($pattern)->sortByName()->count();
+//             $output->writeln(sprintf('%s: %d', $letter, $count));
+//         }
+//         exit();
         $finder->in(self::DIRECTORY)->files()->name('/^[A-E][A-Z]*'.$suffix.'/')->sortByName();
         $fileCount = $finder->count();
         $output->writeln(sprintf('Found %d files for letters A-E ending in %s', $fileCount, $suffix));
